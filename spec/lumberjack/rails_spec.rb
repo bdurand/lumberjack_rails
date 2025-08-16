@@ -14,11 +14,52 @@ describe Lumberjack::Rails do
       expect(out.string.chomp).to eq 'test - [tagged:["foo", "bar"]]'
     end
 
-    it "should wrap other kinds of logger with ActiveSupport Tagged logger" do
-      logger = ::Logger.new(out)
-      tagged_logger = ActiveSupport::TaggedLogging.new(logger)
+    it "should still work for other kinds of loggers enhanced with ActiveSupport::TaggedLogging" do
+      standard_logger = ::Logger.new(out)
+      tagged_logger = ActiveSupport::TaggedLogging.new(standard_logger)
       tagged_logger.tagged("foo", "bar") { tagged_logger.info("test") }
       expect(out.string.chomp).to eq "[foo] [bar] test"
+    end
+
+    it "should work with a broadcast logger" do
+      broadcast_logger = ActiveSupport::BroadcastLogger.new(logger)
+      broadcast_logger.tagged("foo", "bar") do
+        broadcast_logger.info("test")
+      end
+      expect(out.string.chomp).to eq "test - [tagged:[\"foo\", \"bar\"]]"
+    end
+
+    it "should work with local loggers" do
+      tagged_logger = ActiveSupport::TaggedLogging.new(logger)
+      tagged_logger.tagged("foo") do
+        local_logger = tagged_logger.tag(bip: "bap")
+        local_logger.tagged("bar") do
+          local_logger.info("test")
+        end
+      end
+      expect(out.string.chomp).to eq "test - [bip:bap] [tagged:[\"foo\", \"bar\"]]"
+    end
+  end
+
+  describe "broadcast logger support" do
+    let(:logger) { Lumberjack::Logger.new(out, level: :info, template: ":message - :tags") }
+    let(:standard_logger_out) { StringIO.new }
+    let(:standard_logger) { ::Logger.new(standard_logger_out) }
+    let(:broadcast_logger) { ActiveSupport::BroadcastLogger.new(logger, standard_logger) }
+
+    it "sends local logger output back to the broadcast logger" do
+      local_logger = broadcast_logger.tag(foo: "bar")
+      local_logger.info("test")
+      expect(out.string).to include("test")
+      expect(standard_logger_out.string).to include("test")
+    end
+
+    it "can tag logs in a block" do
+      broadcast_logger.tag(foo: "bar") do
+        broadcast_logger.info("test")
+      end
+      expect(out.string).to include("foo:bar")
+      expect(standard_logger_out.string).to_not include("foo")
     end
   end
 
