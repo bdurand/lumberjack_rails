@@ -5,11 +5,5 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
 
   # TODO: hook set stdout and stderr to Lumberjack logger with config option
 
-  # TODO: Add context rack middleware
-
   # TODO: Add request id rack middleware with config
-
-  # TODO: Add actioncable support
-
-  # TODO: Add activejob support
 end

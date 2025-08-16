@@ -3,18 +3,35 @@
 require "lumberjack"
 require "active_support"
 
-module Lumberjack::Rails
-  # This module is needed to prepend the local_level behavior onto Lumberjack::Logger.
-  module LogAtLevel
-    def level
-      local_level || super
+module Lumberjack
+  module Rails
+    class << self
+      def logger_context(additional_logger = nil, &block)
+        rails_logger = ::Rails.logger
+        if additional_logger && rails_logger != additional_logger
+          wrap_block_with_logger_context(rails_logger) do
+            wrap_block_with_logger_context(additional_logger, &block)
+          end
+        else
+          wrap_block_with_logger_context(rails_logger, &block)
+        end
+      end
+
+      private
+
+      def wrap_block_with_logger_context(logger, &block)
+        if logger&.respond_to?(:context)
+          logger.context(&block)
+        else
+          block.call
+        end
+      end
     end
   end
 end
 
-require_relative "rails/action_cable_context"
-require_relative "rails/active_job_context"
 require_relative "rails/broadcast_logger_extension"
+require_relative "rails/log_at_level"
 require_relative "rails/rack/request_id_middleware"
 require_relative "rails/tagged_local_logger"
 require_relative "rails/tagged_logger"
@@ -37,6 +54,26 @@ Lumberjack::Logger.prepend(Lumberjack::Rails::TaggedLogger)
 Lumberjack::LocalLogger.include(Lumberjack::Rails::TaggedLocalLogger)
 
 ActiveSupport::BroadcastLogger.prepend(Lumberjack::Rails::BroadcastLoggerExtension)
+
+ActiveSupport.on_load(:active_job) do
+  ActiveJob::Base.around_perform { |_job, block| Lumberjack::Rails.logger_context(logger, &block) }
+end
+
+ActiveSupport.on_load(:action_cable) do
+  ActionCable::Connection::Base.around_command { |_connection, block| Lumberjack::Rails.logger_context(logger, &block) }
+end
+
+ActiveSupport.on_load(:action_mailer) do
+  ActionMailer::Base.around_action { |_mail, block| Lumberjack::Rails.logger_context(logger, &block) }
+end
+
+ActiveSupport.on_load(:action_mailbox) do
+  ActionMailbox::Base.around_processing { |_mail, block| Lumberjack::Rails.logger_context(logger, &block) }
+end
+
+ActiveSupport.on_load(:action_controller) do
+  ActionController::Base.around_action { |_controller, block| Lumberjack::Rails.logger_context(logger, &block) }
+end
 
 if defined?(Rails::Railtie)
   require_relative "rails/railtie"

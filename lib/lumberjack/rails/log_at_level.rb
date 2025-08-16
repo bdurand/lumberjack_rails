@@ -2,7 +2,10 @@
 
 module Lumberjack
   module Rails
-    module ActiveJobContext
+    module LogAtLevel
+      def level
+        local_level || super
+      end
     end
   end
 end

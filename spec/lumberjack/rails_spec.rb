@@ -32,7 +32,7 @@ describe Lumberjack::Rails do
     it "should work with local loggers" do
       tagged_logger = ActiveSupport::TaggedLogging.new(logger)
       tagged_logger.tagged("foo") do
-        local_logger = tagged_logger.tag(bip: "bap")
+        local_logger = tagged_logger.local_logger(tags: {bip: "bap"})
         local_logger.tagged("bar") do
           local_logger.info("test")
         end
@@ -48,7 +48,7 @@ describe Lumberjack::Rails do
     let(:broadcast_logger) { ActiveSupport::BroadcastLogger.new(logger, standard_logger) }
 
     it "sends local logger output back to the broadcast logger" do
-      local_logger = broadcast_logger.tag(foo: "bar")
+      local_logger = broadcast_logger.local_logger(tags: {foo: "bar"})
       local_logger.info("test")
       expect(out.string).to include("test")
       expect(standard_logger_out.string).to include("test")

@@ -3,16 +3,12 @@
 module Lumberjack
   module Rails
     module BroadcastLoggerExtension
-      extend ActiveSupport::Concern
-
-      def tag(tags)
-        if block_given?
-          super
-        else
-          local_logger = Lumberjack::LocalLogger.new(self)
-          local_logger.tag!(tags)
-          local_logger
-        end
+      def local_logger(level: nil, progname: nil, tags: nil)
+        logger = Lumberjack::LocalLogger.new(self)
+        logger.level = level if level
+        logger.progname = progname if progname
+        logger.tag!(tags) if tags && !tags.empty?
+        logger
       end
     end
   end
