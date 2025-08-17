@@ -6,7 +6,7 @@
 # maintaining compatibility with Rails' logging configuration options.
 #
 # Configuration options:
-#   config.lumberjack.replace_rails_logger (default: false)
+#   config.lumberjack.enabled (default: true)
 #     Whether to replace Rails.logger with Lumberjack::Logger
 #
 #   config.lumberjack.device (default: Rails log file)
@@ -36,9 +36,10 @@
 #   config.lumberjack.device = STDOUT  # optional override
 class Lumberjack::Rails::Railtie < ::Rails::Railtie
   class << self
-    def setup_lumberjack_logger(config, app_paths)
-      return if config.logger
-      return unless config.dig(:lumberjack, :replace_rails_logger)
+    def lumberjack_logger(config, app_paths)
+      return nil if config.logger
+      return nil if config.lumberjack.nil? || config.lumberjack == false
+      return nil if config.lumberjack.empty? || config.lumberjack.enabled == false
 
       # Determine the log device
       device = config.lumberjack.device
@@ -62,7 +63,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       shift_size = config.lumberjack.shift_size || 1048576
 
       # Create logger options
-      logger_options = config.lumberjack.to_h.except(:device, :level, :progname, :tags, :shift_age, :shift_size)
+      logger_options = config.lumberjack.to_h.except(:enabled, :device, :level, :progname, :tags, :shift_age, :shift_size)
       logger_options.merge!(
         level: level,
         formatter: config.lumberjack.formatter,
@@ -73,13 +74,15 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       logger = Lumberjack::Logger.new(device, shift_age, shift_size, **logger_options)
       logger.tag!(tags) if tags
 
-      # Wrap with ActiveSupport::BroadcastLogger for compatibility
-      app.config.logger = ActiveSupport::BroadcastLogger.new(logger)
+      logger
     end
   end
 
+  config.lumberjack = ActiveSupport::OrderedOptions.new
+
   initializer "lumberjack.configure_logger", before: "initialize_logger" do |app|
-    setup_lumberjack_logger(app.config, app.paths)
+    logger = lumberjack_logger(app.config, app.paths)
+    app.config.logger = logger if logger
   end
 
   # TODO: hook set stdout and stderr to Lumberjack logger with config option on rake tasks

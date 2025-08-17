@@ -20,7 +20,9 @@ module Rails
       end
     end
 
-    attr_reader :env
+    def env
+      self.env ||= "test"
+    end
 
     def env=(value)
       @env = ActiveSupport::StringInquirer.new(value)
