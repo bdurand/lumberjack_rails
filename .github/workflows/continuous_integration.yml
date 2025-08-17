@@ -29,13 +29,13 @@ jobs:
           - ruby: "ruby"
             standardrb: true
           - ruby: "3.4"
-            appraisal: activesupport_8
+            appraisal: rails_8
           - ruby: "3.3"
-            appraisal: activesupport_8.0
+            appraisal: rails_8.0
           - ruby: "3.0"
-            appraisal: activesupport_7
+            appraisal: rails_7
           - ruby: "2.7"
-            appraisal: activesupport_7.0
+            appraisal: rails_7.0
           - ruby: "ruby"
             appraisal: no_rails
     steps:
