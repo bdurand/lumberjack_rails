@@ -3,40 +3,33 @@
 module Lumberjack
   module Rails
     module Rack
+      # This Rack middleware provides a convenient way to set up logger tags for each request.
+      # The tags are defined in a callable object that must return a hash. Tags will be applied
+      # to all Lumberjack loggers.
       class RequestMiddleware
-        def initialize(app, logger_handler = nil)
+        # @param app [#call] The Rack application.
+        # @param logger_context_block [Proc] A callable object that returns a hash of logger tags.
+        def initialize(app, logger_context_block = nil)
           @app = app
-          @logger_handler = logger_handler
+          @logger_context_block = logger_context_block
 
-          if @logger_handler && !@logger_handler.respond_to?(:call)
-            raise ArgumentError.new("logger_handler must respond to call")
+          unless @logger_context_block.respond_to?(:call)
+            raise ArgumentError.new("logger_context_block must respond to call")
           end
         end
 
         def call(env)
-          # Wrap the request in a logger context for both Rails.logger and ActionController logger
-          action_controller_logger = ActionController::Base.logger if defined?(ActionController::Base)
-
-          Lumberjack::Rails.logger_context(action_controller_logger) do
-            if @logger_handler
-              # If a logger handler is provided, use it to set tags
-              tags = @logger_handler.call(env)
-              if tags.is_a?(Hash) && !tags.empty?
-                Lumberjack.tag(tags) do
-                  @app.call(env)
-                end
-              else
-                @app.call(env)
-              end
-            else
+          request = ActionDispatch::Request.new(env)
+          logger_tags = @logger_context_block.call(request)
+          if logger_tags.is_a?(Hash)
+            Lumberjack.tag(logger_tags) do
               @app.call(env)
             end
+          else
+            @app.call(env)
           end
         end
       end
-
-      # Alias for backward compatibility
-      RequestTaggingMiddleware = RequestMiddleware
     end
   end
 end

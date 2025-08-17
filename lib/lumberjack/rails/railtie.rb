@@ -118,5 +118,12 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
     end
   end
 
-  # TODO: Add logger context rack middleware with config
+  initializer "lumberjack.insert_context_middleware", before: :build_middleware_stack do |app|
+    # Add the ContextMiddleware to the very start of the middleware chain
+    # This ensures that all subsequent middleware and the application itself
+    # run within the Lumberjack logger context
+    if app.config.lumberjack&.enabled != false
+      app.middleware.insert_before 0, Lumberjack::Rails::Rack::ContextMiddleware
+    end
+  end
 end
