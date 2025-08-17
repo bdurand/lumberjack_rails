@@ -33,7 +33,7 @@ end
 require_relative "rails/broadcast_logger_extension"
 require_relative "rails/log_at_level"
 require_relative "rails/rack/context_middleware"
-require_relative "rails/rack/request_middleware"
+require_relative "rails/rack/tag_logs_middleware"
 require_relative "rails/tagged_local_logger"
 require_relative "rails/tagged_logger"
 require_relative "rails/tagged_logging_formatter"

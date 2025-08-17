@@ -2,7 +2,7 @@
 
 require_relative "../../../spec_helper"
 
-RSpec.describe Lumberjack::Rails::Rack::RequestMiddleware do
+RSpec.describe Lumberjack::Rails::Rack::ContextMiddleware do
   let(:logger) { Lumberjack::Logger.new(:test) }
 
   let(:app) do

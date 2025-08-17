@@ -30,6 +30,11 @@
 #     Whether to redirect $stdout and $stderr to Rails.logger for rake tasks
 #     that depend on the :environment task when using a Lumberjack::Logger
 #
+#   config.lumberjack.tag_request_logs (default: nil)
+#     A proc or hash to add tags to log entries for each request. If a proc,
+#     it will be called with the request object. If a hash, it will be used
+#     as static tags for all requests.
+#
 #   config.lumberjack.*
 #     All other options are sent as options to the Lumberjack logger
 #     constructor.
@@ -68,7 +73,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
 
       # Create logger options
       logger_options = config.lumberjack.to_h.except(
-        :enabled, :device, :level, :progname, :tags, :shift_age, :shift_size, :log_rake_tasks
+        :enabled, :device, :level, :progname, :tags, :shift_age, :shift_size, :log_rake_tasks, :tag_request_logs
       )
       logger_options.merge!(
         level: level,
@@ -108,6 +113,34 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
     app.config.logger = logger if logger
   end
 
+  initializer "lumberjack.insert_context_middleware", before: :build_middleware_stack do |app|
+    # Add the ContextMiddleware to the very start of the middleware chain
+    # This ensures that all subsequent middleware and the application itself
+    # run within the Lumberjack logger context
+    if app.config.lumberjack&.enabled != false
+      app.middleware.insert_before 0, Lumberjack::Rails::Rack::ContextMiddleware
+    end
+  end
+
+  initializer "lumberjack.insert_tag_logs_middleware", after: :build_middleware_stack do |app|
+    next if app.config.lumberjack&.enabled != false
+
+    tags_block = app.config.lumberjack.tag_request_logs
+    if tags_block.is_a?(Hash)
+      tags_hash = tags_block
+      tags_block = lambda { |request| tags_hash }
+    end
+    next unless tags_block.respond_to?(:call)
+
+    # Insert after ActionDispatch::RequestId or fallback to after ContextMiddleware
+    request_id_middleware = app.middleware.detect { |middleware| middleware.klass == ActionDispatch::RequestId }
+    if request_id_middleware
+      app.middleware.insert_after ActionDispatch::RequestId, Lumberjack::Rails::Rack::TagLogsMiddleware, tags_block
+    else
+      app.middleware.insert_after Lumberjack::Rails::Rack::ContextMiddleware, Lumberjack::Rails::Rack::TagLogsMiddleware, tags_block
+    end
+  end
+
   rake_tasks do
     # Enhance the :environment task to set standard streams to loggers
     # This will apply to any rake task that depends on :environment
@@ -115,15 +148,6 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       Rake::Task[:environment].enhance do
         Lumberjack::Rails::Railtie.set_standard_streams_to_loggers!
       end
-    end
-  end
-
-  initializer "lumberjack.insert_context_middleware", before: :build_middleware_stack do |app|
-    # Add the ContextMiddleware to the very start of the middleware chain
-    # This ensures that all subsequent middleware and the application itself
-    # run within the Lumberjack logger context
-    if app.config.lumberjack&.enabled != false
-      app.middleware.insert_before 0, Lumberjack::Rails::Rack::ContextMiddleware
     end
   end
 end

@@ -2,7 +2,7 @@
 
 require_relative "../../../spec_helper"
 
-RSpec.describe Lumberjack::Rails::Rack::RequestMiddleware do
+RSpec.describe Lumberjack::Rails::Rack::TagLogsMiddleware do
   let(:app) do
     lambda do |env|
       [200, logger.tags, ["OK"]]
@@ -14,14 +14,14 @@ RSpec.describe Lumberjack::Rails::Rack::RequestMiddleware do
   let(:logger) { Lumberjack::Logger.new(:test) }
 
   it "adds tags to loggers for the request" do
-    middleware = Lumberjack::Rails::Rack::RequestMiddleware.new(app, ->(request) { {method: request.method} })
+    middleware = Lumberjack::Rails::Rack::TagLogsMiddleware.new(app, ->(request) { {method: request.method} })
     response = middleware.call(env)
 
     expect(response).to eq([200, {"method" => "GET"}, ["OK"]])
   end
 
   it "does not add tags if the logger_context_block does not return a hash" do
-    middleware = Lumberjack::Rails::Rack::RequestMiddleware.new(app, ->(request) { "invalid" })
+    middleware = Lumberjack::Rails::Rack::TagLogsMiddleware.new(app, ->(request) { "invalid" })
     response = middleware.call(env)
 
     expect(response).to eq([200, {}, ["OK"]])
