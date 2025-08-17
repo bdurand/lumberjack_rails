@@ -2,7 +2,7 @@
 
 require_relative "../spec_helper"
 
-describe "ActiveJob integration" do
+RSpec.describe "ActiveJob integration" do
   require "active_job"
 
   # Test job classes

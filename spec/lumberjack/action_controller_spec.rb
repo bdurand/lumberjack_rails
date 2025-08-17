@@ -2,7 +2,7 @@
 
 require_relative "../spec_helper"
 
-describe "ActionController integration" do
+RSpec.describe "ActionController integration" do
   require "action_controller"
 
   class TestController < ActionController::Base

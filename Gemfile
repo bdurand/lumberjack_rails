@@ -3,8 +3,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "lumberjack", path: "../lumberjack" # github: "bdurand/lumberjack", branch: "lumberjack_2"
-gem "activesupport", require: false
-gem "activejob", require: false
+gem "rails", require: false
 
 gem "dotenv"
 gem "rspec", "~> 3.10"

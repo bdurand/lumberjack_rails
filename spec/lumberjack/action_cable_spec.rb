@@ -2,7 +2,7 @@
 
 require_relative "../spec_helper"
 
-describe "ActionCable integration" do
+RSpec.describe "ActionCable integration" do
   require "action_cable"
 
   class TestConnection < ActionCable::Connection::Base

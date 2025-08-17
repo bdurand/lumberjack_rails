@@ -2,7 +2,7 @@
 
 require_relative "../spec_helper"
 
-describe "ActionMailer integration" do
+RSpec.describe "ActionMailer integration" do
   require "action_mailer"
 
   class TestMailer < ActionMailer::Base

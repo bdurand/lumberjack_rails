@@ -2,7 +2,7 @@
 
 require_relative "../spec_helper"
 
-describe Lumberjack::Rails do
+RSpec.describe Lumberjack::Rails do
   let(:out) { StringIO.new }
 
   describe "tagged logging support" do
