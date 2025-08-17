@@ -19,6 +19,7 @@ Gem::Specification.new do |spec|
     Rakefile
     gemfiles/
     spec/
+    test_app/
   ]
   spec.files = Dir.chdir(__dir__) do
     `git ls-files -z`.split("\x0").reject { |f| ignore_files.any? { |path| f.start_with?(path) } }
@@ -29,5 +30,5 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = ">= 2.7"
 
   spec.add_dependency "lumberjack", ">=2.0"
-  spec.add_dependency "rails", ">= 7.0"
+  spec.add_dependency "activesupport", ">= 7.0"
 end
