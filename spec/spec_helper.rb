@@ -1,34 +1,38 @@
 # frozen_string_literal: true
 
 require "stringio"
-require "rspec" if defined?(RSpec) == nil
+require "rspec"
 
-require_relative "../lib/lumberjack_rails"
+begin
+  require "rails"
+rescue LoadError
+  # Stub Rails module for tests
+  module Rails
+    @logger = nil
 
-# Mock out Rails.logger for tests
-module Rails
-  @logger = nil
+    class << self
+      attr_reader :logger
 
-  class << self
-    attr_reader :logger
-
-    def logger=(logger)
-      @logger = if logger.is_a?(ActiveSupport::BroadcastLogger)
-        logger
-      else
-        ActiveSupport::BroadcastLogger.new(logger)
+      def logger=(logger)
+        @logger = if logger.is_a?(ActiveSupport::BroadcastLogger)
+          logger
+        else
+          ActiveSupport::BroadcastLogger.new(logger)
+        end
       end
-    end
 
-    def env
-      self.env ||= "test"
-    end
+      def env
+        self.env ||= "test"
+      end
 
-    def env=(value)
-      @env = ActiveSupport::StringInquirer.new(value)
+      def env=(value)
+        @env = ActiveSupport::StringInquirer.new(value)
+      end
     end
   end
 end
+
+require_relative "../lib/lumberjack_rails"
 
 RSpec.configure do |config|
   config.disable_monkey_patching!

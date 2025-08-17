@@ -30,7 +30,7 @@ RSpec.describe "ActionMailbox integration" do
   def create_test_inbound_email
     double("InboundEmail").tap do |email|
       # Methods called during processing
-      allow(email).to receive(:instrumentation_payload).and_return({ source: "test" })
+      allow(email).to receive(:instrumentation_payload).and_return({source: "test"})
       allow(email).to receive(:processing!).and_return(nil)
       allow(email).to receive(:delivered!).and_return(nil)
 

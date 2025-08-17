@@ -26,6 +26,10 @@
 #     The size (in bytes) of log files before they are rotated if shift_age
 #     is set to 0.
 #
+#   config.lumberjack.log_rake_tasks (default: false)
+#     Whether to redirect $stdout and $stderr to Rails.logger for rake tasks
+#     that depend on the :environment task when using a Lumberjack::Logger
+#
 #   config.lumberjack.*
 #     All other options are sent as options to the Lumberjack logger
 #     constructor.
@@ -63,7 +67,9 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       shift_size = config.lumberjack.shift_size || 1048576
 
       # Create logger options
-      logger_options = config.lumberjack.to_h.except(:enabled, :device, :level, :progname, :tags, :shift_age, :shift_size)
+      logger_options = config.lumberjack.to_h.except(
+        :enabled, :device, :level, :progname, :tags, :shift_age, :shift_size, :log_rake_tasks
+      )
       logger_options.merge!(
         level: level,
         formatter: config.lumberjack.formatter,
@@ -76,6 +82,19 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
 
       logger
     end
+
+    def set_standard_streams_to_loggers!(config, logger)
+      return unless config.lumberjack&.log_rake_tasks
+      return unless logger.respond_to?(:local_logger) && logger.respond_to?(:puts)
+
+      stdout_logger = logger.local_logger
+      stdout_logger.default_severity = :info
+      $stdout = stdout_logger
+
+      stderr_logger = logger.local_logger
+      stderr_logger.default_severity = :warn
+      $stderr = stderr_logger
+    end
   end
 
   config.lumberjack = ActiveSupport::OrderedOptions.new
@@ -85,7 +104,15 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
     app.config.logger = logger if logger
   end
 
-  # TODO: hook set stdout and stderr to Lumberjack logger with config option on rake tasks
+  rake_tasks do
+    # Enhance the :environment task to set standard streams to loggers
+    # This will apply to any rake task that depends on :environment
+    if Rake::Task.task_defined?(:environment)
+      Rake::Task[:environment].enhance do
+        Lumberjack::Rails::Railtie.set_standard_streams_to_loggers!
+      end
+    end
+  end
 
   # TODO: Add logger context rack middleware with config
 end
