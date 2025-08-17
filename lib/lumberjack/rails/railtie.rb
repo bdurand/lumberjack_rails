@@ -87,13 +87,17 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       return unless config.lumberjack&.log_rake_tasks
       return unless logger.respond_to?(:local_logger) && logger.respond_to?(:puts)
 
-      stdout_logger = logger.local_logger
-      stdout_logger.default_severity = :info
-      $stdout = stdout_logger
+      unless $stdout.tty?
+        stdout_logger = logger.local_logger
+        stdout_logger.default_severity = :info
+        $stdout = stdout_logger
+      end
 
-      stderr_logger = logger.local_logger
-      stderr_logger.default_severity = :warn
-      $stderr = stderr_logger
+      unless $stderr.tty?
+        stderr_logger = logger.local_logger
+        stderr_logger.default_severity = :warn
+        $stderr = stderr_logger
+      end
     end
   end
 

@@ -111,21 +111,24 @@ RSpec.describe "Railtie" do
 
   describe ".set_standard_streams_to_loggers!" do
     let(:logger) { ActiveSupport::BroadcastLogger.new(Lumberjack::Logger.new(:test)) }
-    let!(:original_stdout) { $stdout }
-    let!(:original_stderr) { $stderr }
 
-    after do
-      # Always restore original streams after each test
-      $stdout = original_stdout
-      $stderr = original_stderr
+    around do |example|
+      save_stdout = $stdout
+      save_stderr = $stderr
+      begin
+        $stdout = StringIO.new
+        $stderr = StringIO.new
+        example.run
+      ensure
+        $stdout = save_stdout
+        $stderr = save_stderr
+      end
     end
 
     it "redirects $stdout and $stderr to logger streams when config.lumberjack.log_rake_tasks is true" do
       config.lumberjack.log_rake_tasks = true
       Lumberjack::Rails::Railtie.set_standard_streams_to_loggers!(config, logger)
 
-      expect($stdout).to_not eq(original_stdout)
-      expect($stderr).to_not eq(original_stderr)
       expect($stdout).to be_a(Lumberjack::IOCompatibility)
       expect($stderr).to be_a(Lumberjack::IOCompatibility)
     end
@@ -134,24 +137,33 @@ RSpec.describe "Railtie" do
       config.lumberjack = nil
       Lumberjack::Rails::Railtie.set_standard_streams_to_loggers!(config, logger)
 
-      expect($stdout).to eq(original_stdout)
-      expect($stderr).to eq(original_stderr)
+      expect($stdout).to be_a(StringIO)
+      expect($stderr).to be_a(StringIO)
     end
 
     it "does not redirect standard streams when config.lumberjack.log_rake_tasks is not true" do
       config.lumberjack.log_rake_tasks = nil
       Lumberjack::Rails::Railtie.set_standard_streams_to_loggers!(config, logger)
 
-      expect($stdout).to eq(original_stdout)
-      expect($stderr).to eq(original_stderr)
+      expect($stdout).to be_a(StringIO)
+      expect($stderr).to be_a(StringIO)
     end
 
     it "does not redirect standard streams when Rails.logger is not a lumberjack logger" do
       logger = ActiveSupport::BroadcastLogger.new(Logger.new(File::NULL))
       Lumberjack::Rails::Railtie.set_standard_streams_to_loggers!(config, logger)
 
-      expect($stdout).to eq(original_stdout)
-      expect($stderr).to eq(original_stderr)
+      expect($stdout).to be_a(StringIO)
+      expect($stderr).to be_a(StringIO)
+    end
+
+    it "does not redirect tty streams" do
+      config.lumberjack.log_rake_tasks = true
+      allow($stdout).to receive(:tty?).and_return(true)
+      Lumberjack::Rails::Railtie.set_standard_streams_to_loggers!(config, logger)
+
+      expect($stdout).to be_a(StringIO)
+      expect($stderr).to be_a(Lumberjack::IOCompatibility)
     end
   end
 rescue LoadError
