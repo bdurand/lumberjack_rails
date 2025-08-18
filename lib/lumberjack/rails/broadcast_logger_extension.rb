@@ -3,11 +3,11 @@
 module Lumberjack
   module Rails
     module BroadcastLoggerExtension
-      def local_logger(level: nil, progname: nil, tags: nil)
+      def local_logger(level: nil, progname: nil, attributes: nil)
         logger = Lumberjack::LocalLogger.new(self)
         logger.level = level if level
         logger.progname = progname if progname
-        logger.tag!(tags) if tags && !tags.empty?
+        logger.tag!(attributes) if attributes && !attributes.empty?
         logger
       end
     end

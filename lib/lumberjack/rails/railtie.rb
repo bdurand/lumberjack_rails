@@ -15,8 +15,8 @@
 #   config.lumberjack.level (default: config.log_level)
 #     The log level for the Lumberjack logger
 #
-#   config.lumberjack.attributes (default: nil)
-#     Tags to apply to log messages
+#   config.lumberjack.global_attributes (default: nil)
+#     Attributes to apply to log messages
 #
 #   config.lumberjack.shift_age (default: 0)
 #     The age (in seconds) of log files before they are rotated or
@@ -61,8 +61,8 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       # Determine the log level
       level = config.lumberjack.level || config.log_level || :debug
 
-      # Get default tags
-      attributes = config.lumberjack.attributes
+      # Get default attributes
+      attributes = config.lumberjack.global_attributes
       if config.log_tags
         attributes ||= {}
         attributes["tags"] = config.log_tags
@@ -73,7 +73,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
 
       # Create logger options
       logger_options = config.lumberjack.to_h.except(
-        :enabled, :device, :level, :progname, :attributes, :shift_age, :shift_size, :log_rake_tasks, :tag_request_logs
+        :enabled, :device, :level, :progname, :global_attributes, :shift_age, :shift_size, :log_rake_tasks, :tag_request_logs
       )
       logger_options.merge!(
         level: level,
@@ -125,19 +125,19 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
   initializer "lumberjack.insert_tag_logs_middleware", after: :build_middleware_stack do |app|
     next if app.config.lumberjack&.enabled != false
 
-    tags_block = app.config.lumberjack.tag_request_logs
-    if tags_block.is_a?(Hash)
-      tags_hash = tags_block
-      tags_block = lambda { |request| tags_hash }
+    attributes_block = app.config.lumberjack.tag_request_logs
+    if attributes_block.is_a?(Hash)
+      attributes_hash = attributes_block
+      attributes_block = lambda { |request| attributes_hash }
     end
-    next unless tags_block.respond_to?(:call)
+    next unless attributes_block.respond_to?(:call)
 
     # Insert after ActionDispatch::RequestId or fallback to after ContextMiddleware
     request_id_middleware = app.middleware.detect { |middleware| middleware.klass == ActionDispatch::RequestId }
     if request_id_middleware
-      app.middleware.insert_after ActionDispatch::RequestId, Lumberjack::Rails::Rack::TagLogsMiddleware, tags_block
+      app.middleware.insert_after ActionDispatch::RequestId, Lumberjack::Rails::Rack::TagLogsMiddleware, attributes_block
     else
-      app.middleware.insert_after Lumberjack::Rails::Rack::ContextMiddleware, Lumberjack::Rails::Rack::TagLogsMiddleware, tags_block
+      app.middleware.insert_after Lumberjack::Rails::Rack::ContextMiddleware, Lumberjack::Rails::Rack::TagLogsMiddleware, attributes_block
     end
   end
 

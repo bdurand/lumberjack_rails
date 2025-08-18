@@ -14,6 +14,29 @@ RSpec.describe Lumberjack::Rails do
       expect(out.string.chomp).to eq 'test - [tags:["foo", "bar"]]'
     end
 
+    it "can still pass attributes with a tagged logger message" do
+      tagged_logger = ActiveSupport::TaggedLogging.new(logger)
+      tagged_logger.info("test", foo: "bar")
+      expect(out.string.chomp).to eq "test - [foo:bar]"
+    end
+
+    it "can still pass attributes to the logger returned from tagged" do
+      tagged_logger = ActiveSupport::TaggedLogging.new(logger)
+      tagged_logger.tagged("foo", "bar") { tagged_logger.info("test", bip: "bap") }
+      expect(out.string.chomp).to eq "test - [bip:bap] [tags:[\"foo\", \"bar\"]]"
+    end
+
+    it "can be configured with helpers to format tags like ActiveSupport::TaggedLogging does" do
+      logger = Lumberjack::Logger.new(
+        out,
+        template: Lumberjack::Rails::TaggedLogger.template,
+        formatter: Lumberjack::Rails::TaggedLogger.entry_formatter
+      )
+      tagged_logger = ActiveSupport::TaggedLogging.new(logger)
+      tagged_logger.tagged("foo", "bar") { tagged_logger.info("test", bar: "baz") }
+      expect(out.string.chomp).to end_with("[foo] [bar] test [bar:baz]")
+    end
+
     it "should still work for other kinds of loggers enhanced with ActiveSupport::TaggedLogging" do
       standard_logger = ::Logger.new(out)
       tagged_logger = ActiveSupport::TaggedLogging.new(standard_logger)
@@ -42,13 +65,13 @@ RSpec.describe Lumberjack::Rails do
   end
 
   describe "broadcast logger support" do
-    let(:logger) { Lumberjack::Logger.new(out, level: :info, template: ":message - :tags") }
+    let(:logger) { Lumberjack::Logger.new(out, level: :info, template: ":message - :attributes") }
     let(:standard_logger_out) { StringIO.new }
     let(:standard_logger) { ::Logger.new(standard_logger_out) }
     let(:broadcast_logger) { ActiveSupport::BroadcastLogger.new(logger, standard_logger) }
 
     it "sends local logger output back to the broadcast logger" do
-      local_logger = broadcast_logger.local_logger(tags: {foo: "bar"})
+      local_logger = broadcast_logger.local_logger(attributes: {foo: "bar"})
       local_logger.info("test")
       expect(out.string).to include("test")
       expect(standard_logger_out.string).to include("test")
