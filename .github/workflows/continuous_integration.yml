@@ -35,7 +35,7 @@ jobs:
           - ruby: "3.0"
             appraisal: rails_7
           - ruby: "2.7"
-            appraisal: rails_7.0
+            appraisal: rails_7.1
           - ruby: "ruby"
             appraisal: no_rails
     steps:

@@ -10,8 +10,8 @@ appraise "rails_7" do
   gem "rails", "~> 7.0", require: false
 end
 
-appraise "rails_7.0" do
-  gem "rails", "~> 7.0.0", require: false
+appraise "rails_7.1" do
+  gem "rails", "~> 7.1.0", require: false
 end
 
 appraise "no_rails" do
