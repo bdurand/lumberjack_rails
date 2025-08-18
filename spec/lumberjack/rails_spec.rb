@@ -6,12 +6,12 @@ RSpec.describe Lumberjack::Rails do
   let(:out) { StringIO.new }
 
   describe "tagged logging support" do
-    let(:logger) { Lumberjack::Logger.new(out, level: :info, template: ":message - :tags") }
+    let(:logger) { Lumberjack::Logger.new(out, level: :info, template: ":message - :attributes") }
 
     it "should wrap a Lumberjack logger as a tagged logger" do
       tagged_logger = ActiveSupport::TaggedLogging.new(logger)
       tagged_logger.tagged("foo", "bar") { tagged_logger.info("test") }
-      expect(out.string.chomp).to eq 'test - [tagged:["foo", "bar"]]'
+      expect(out.string.chomp).to eq 'test - [tags:["foo", "bar"]]'
     end
 
     it "should still work for other kinds of loggers enhanced with ActiveSupport::TaggedLogging" do
@@ -26,7 +26,7 @@ RSpec.describe Lumberjack::Rails do
       broadcast_logger.tagged("foo", "bar") do
         broadcast_logger.info("test")
       end
-      expect(out.string.chomp).to eq "test - [tagged:[\"foo\", \"bar\"]]"
+      expect(out.string.chomp).to eq "test - [tags:[\"foo\", \"bar\"]]"
     end
 
     it "should work with local loggers" do
@@ -37,7 +37,7 @@ RSpec.describe Lumberjack::Rails do
           local_logger.info("test")
         end
       end
-      expect(out.string.chomp).to eq "test - [bip:bap] [tagged:[\"foo\", \"bar\"]]"
+      expect(out.string.chomp).to eq "test - [bip:bap] [tags:[\"foo\", \"bar\"]]"
     end
   end
 

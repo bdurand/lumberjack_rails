@@ -62,10 +62,10 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       level = config.lumberjack.level || config.log_level || :debug
 
       # Get default tags
-      tags = config.lumberjack.attributes
+      attributes = config.lumberjack.attributes
       if config.log_tags
-        tags ||= {}
-        tags["tagged"] = config.log_tags
+        attributes ||= {}
+        attributes["tags"] = config.log_tags
       end
 
       shift_age = config.lumberjack.shift_age || 0
@@ -73,7 +73,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
 
       # Create logger options
       logger_options = config.lumberjack.to_h.except(
-        :enabled, :device, :level, :progname, :tags, :shift_age, :shift_size, :log_rake_tasks, :tag_request_logs
+        :enabled, :device, :level, :progname, :attributes, :shift_age, :shift_size, :log_rake_tasks, :tag_request_logs
       )
       logger_options.merge!(
         level: level,
@@ -83,7 +83,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
 
       # Create the Lumberjack logger
       logger = Lumberjack::Logger.new(device, shift_age, shift_size, **logger_options)
-      logger.tag!(tags) if tags
+      logger.tag!(attributes) if attributes
 
       logger
     end

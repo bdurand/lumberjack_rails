@@ -7,7 +7,7 @@ module Lumberjack::Rails
     def format(message, tags)
       tagged_values = current_tags if respond_to?(:current_tags)
       if tagged_values && !tagged_values.empty?
-        tagged = {"tagged" => tagged_values}
+        tagged = {"tags" => tagged_values}
         new_tags = tags.nil? ? tagged : tags.merge(tagged)
       else
         new_tags = tags
