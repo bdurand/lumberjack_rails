@@ -81,20 +81,20 @@ RSpec.describe "Railtie" do
         expect(logger.level).to eq(Logger::WARN)
       end
 
-      it "adds config.lumberjack.tags to the logger" do
-        config.lumberjack.tags = {foo: "bar"}
-        expect(logger.tags).to eq("foo" => "bar")
+      it "adds config.lumberjack.attributes to the logger" do
+        config.lumberjack.attributes = {foo: "bar"}
+        expect(logger.attributes).to eq("foo" => "bar")
       end
 
       it "adds tagged logger tags from config.log_tags" do
         config.log_tags = ["foo", "bar"]
-        expect(logger.tags).to eq("tagged" => ["foo", "bar"])
+        expect(logger.attributes).to eq("tagged" => ["foo", "bar"])
       end
 
-      it "merges config.lumberjack.tags and config.log_tags" do
-        config.lumberjack.tags = {baz: "qux"}
+      it "merges config.lumberjack.attributes and config.log_tags" do
+        config.lumberjack.attributes = {baz: "qux"}
         config.log_tags = ["foo", "bar"]
-        expect(logger.tags).to eq("baz" => "qux", "tagged" => ["foo", "bar"])
+        expect(logger.attributes).to eq("baz" => "qux", "tagged" => ["foo", "bar"])
       end
 
       it "passes the default shift_age and shift_size to the logger" do

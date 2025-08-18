@@ -32,7 +32,7 @@ RSpec.describe Lumberjack::Rails do
     it "should work with local loggers" do
       tagged_logger = ActiveSupport::TaggedLogging.new(logger)
       tagged_logger.tagged("foo") do
-        local_logger = tagged_logger.local_logger(tags: {bip: "bap"})
+        local_logger = tagged_logger.local_logger(attributes: {bip: "bap"})
         local_logger.tagged("bar") do
           local_logger.info("test")
         end

@@ -15,7 +15,7 @@
 #   config.lumberjack.level (default: config.log_level)
 #     The log level for the Lumberjack logger
 #
-#   config.lumberjack.tags (default: nil)
+#   config.lumberjack.attributes (default: nil)
 #     Tags to apply to log messages
 #
 #   config.lumberjack.shift_age (default: 0)
@@ -41,7 +41,7 @@
 #
 # Example usage in config/application.rb:
 #   config.log_level = :info
-#   config.tags = {app: "my_app", host: Lumberjack::Utils.hostname}
+#   config.attributes = {app: "my_app", host: Lumberjack::Utils.hostname}
 #   config.lumberjack.device = STDOUT  # optional override
 class Lumberjack::Rails::Railtie < ::Rails::Railtie
   class << self
@@ -62,7 +62,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       level = config.lumberjack.level || config.log_level || :debug
 
       # Get default tags
-      tags = config.lumberjack.tags
+      tags = config.lumberjack.attributes
       if config.log_tags
         tags ||= {}
         tags["tagged"] = config.log_tags

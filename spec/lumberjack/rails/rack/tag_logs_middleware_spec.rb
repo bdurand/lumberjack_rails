@@ -5,7 +5,7 @@ require_relative "../../../spec_helper"
 RSpec.describe Lumberjack::Rails::Rack::TagLogsMiddleware do
   let(:app) do
     lambda do |env|
-      [200, logger.tags, ["OK"]]
+      [200, logger.attributes, ["OK"]]
     end
   end
 
