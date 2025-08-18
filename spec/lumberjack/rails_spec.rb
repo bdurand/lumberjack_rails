@@ -82,12 +82,13 @@ RSpec.describe Lumberjack::Rails do
     end
 
     it "should set the local level in isolation" do
-      fiber = Fiber.new do
+      thread = Thread.new do
         logger.local_level = :warn
         expect(logger.local_level).to eq(Logger::WARN)
         expect(logger.level).to eq(Logger::WARN)
       end
 
+      thread.join
       expect(logger.local_level).to be_nil
       expect(logger.level).to eq(Logger::INFO)
     end
