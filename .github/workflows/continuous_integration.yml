@@ -32,9 +32,9 @@ jobs:
             appraisal: rails_8
           - ruby: "3.3"
             appraisal: rails_8.0
-          - ruby: "3.0"
+          - ruby: "3.1"
             appraisal: rails_7
-          - ruby: "2.7"
+          - ruby: "3.0"
             appraisal: rails_7.1
           - ruby: "ruby"
             appraisal: no_rails
