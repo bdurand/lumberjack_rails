@@ -61,7 +61,7 @@ ActiveSupport.on_load(:active_job) do
 end
 
 ActiveSupport.on_load(:action_cable) do
-  ActionCable::Connection::Base.around_command { |_connection, block| Lumberjack::Rails.logger_context(logger, &block) }
+  ActionCable::Connection::Base.around_command { |_command, block| Lumberjack::Rails.logger_context(logger, &block) }
 end
 
 ActiveSupport.on_load(:action_mailer) do
