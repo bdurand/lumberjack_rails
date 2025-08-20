@@ -53,9 +53,11 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       # Determine the log device
       device = config.lumberjack.device
       if device.nil?
-        # Use the same logic Rails uses to determine the log file
-        log_file = app_paths["log"].first
-        device = File.join(log_file, "#{Rails.env}.log")
+        log_file_path = app_paths["log"]&.first
+        if log_file_path
+          FileUtils.mkdir_p(File.dirname(log_file_path)) unless File.exist?(File.dirname(log_file_path))
+          device = log_file_path
+        end
       end
 
       # Determine the log level
@@ -92,13 +94,13 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       return unless config.lumberjack&.log_rake_tasks
       return unless logger.respond_to?(:local_logger) && logger.respond_to?(:puts)
 
-      unless $stdout.tty?
+      if !$stdout.tty? && !$stdout.is_a?(::Logger)
         stdout_logger = logger.local_logger
         stdout_logger.default_severity = :info
         $stdout = stdout_logger
       end
 
-      unless $stderr.tty?
+      if !$stderr.tty? && !$stderr.is_a?(::Logger)
         stderr_logger = logger.local_logger
         stderr_logger.default_severity = :warn
         $stderr = stderr_logger
@@ -108,8 +110,8 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
 
   config.lumberjack = ActiveSupport::OrderedOptions.new
 
-  initializer "lumberjack.configure_logger", before: "initialize_logger" do |app|
-    logger = lumberjack_logger(app.config, app.paths)
+  initializer "lumberjack.configure_logger", before: :initialize_logger do |app|
+    logger = Lumberjack::Rails::Railtie.lumberjack_logger(app.config, app.paths)
     app.config.logger = logger if logger
   end
 
@@ -141,12 +143,12 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
     end
   end
 
-  rake_tasks do
+  config.after_initialize do
     # Enhance the :environment task to set standard streams to loggers
     # This will apply to any rake task that depends on :environment
-    if Rake::Task.task_defined?(:environment)
+    if defined?(Rake::Task) && Rake::Task.task_defined?(:environment)
       Rake::Task[:environment].enhance do
-        Lumberjack::Rails::Railtie.set_standard_streams_to_loggers!
+        Lumberjack::Rails::Railtie.set_standard_streams_to_loggers!(::Rails.application.config, ::Rails.logger)
       end
     end
   end

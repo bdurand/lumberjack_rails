@@ -13,9 +13,7 @@ RSpec.describe "Railtie" do
   end
 
   let(:paths) do
-    Rails::Paths::Root.new(Pathname.new(".")).tap do |p|
-      p.add "log", to: "log"
-    end
+    Rails::Paths::Root.new(Pathname.new(Dir.tmpdir))
   end
 
   describe ".lumberjack_logger" do
@@ -58,15 +56,15 @@ RSpec.describe "Railtie" do
       end
 
       it "uses the default log file if config.lumberjack.device is not set" do
-        log_file_path = File.join(paths["log"].first, "#{Rails.env}.log")
+        log_file_path = File.join(Dir.tmpdir, "test.log")
+        paths.add("log", with: "test.log")
+
         begin
-          FileUtils.mkdir_p(paths["log"].first)
           config.lumberjack.device = nil
           expect(logger.device).to be_a(Lumberjack::Device::Writer)
           expect(logger.device.path).to eq(log_file_path)
         ensure
           FileUtils.rm_f(log_file_path)
-          FileUtils.rmdir(paths["log"].first)
         end
       end
 

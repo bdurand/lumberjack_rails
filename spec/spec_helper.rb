@@ -21,10 +21,6 @@ rescue LoadError
         end
       end
 
-      def env
-        self.env ||= "test"
-      end
-
       def env=(value)
         @env = ActiveSupport::StringInquirer.new(value)
       end
