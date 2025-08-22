@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../spec_helper"
+require "spec_helper"
 
 RSpec.describe "ActionMailer integration" do
   require "action_mailer"
@@ -13,7 +13,7 @@ RSpec.describe "ActionMailer integration" do
     end
 
     def test_email(lumberjack_logger)
-      self.class.last_context_result = lumberjack_logger.context?
+      self.class.last_context_result = lumberjack_logger.in_context?
 
       mail(
         to: "test@example.com",

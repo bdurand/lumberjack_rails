@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../spec_helper"
+require "spec_helper"
 
 RSpec.describe "ActiveJob integration" do
   require "active_job"
@@ -8,7 +8,7 @@ RSpec.describe "ActiveJob integration" do
   # Test job classes
   class TestJob < ActiveJob::Base
     def perform(lumberjack_logger)
-      lumberjack_logger.context?
+      lumberjack_logger.in_context?
     end
   end
 

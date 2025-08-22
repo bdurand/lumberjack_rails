@@ -6,3 +6,4 @@ ignore:
   - 'spec/**/*':
     - Lint/UselessAssignment
     - Lint/Void
+  - 'test_app/**/*'

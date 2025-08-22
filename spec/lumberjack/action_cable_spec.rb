@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../spec_helper"
+require "spec_helper"
 
 RSpec.describe "ActionCable integration" do
   require "action_cable"
@@ -17,7 +17,7 @@ RSpec.describe "ActionCable integration" do
       # Manually trigger the around_command callback behavior
       # Pass the logger like ActionCable does: logger_context(logger, &block)
       Lumberjack::Rails.logger_context(logger) do
-        self.class.last_context_result = test_logger&.context?
+        self.class.last_context_result = test_logger&.in_context?
       end
     end
 

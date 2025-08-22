@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-require_relative "../../../spec_helper"
+require "spec_helper"
 
 RSpec.describe Lumberjack::Rails::Rack::ContextMiddleware do
   let(:logger) { Lumberjack::Logger.new(:test) }
 
   let(:app) do
-    lambda { |env| [200, {context: logger.context?}, ["OK"]] }
+    lambda { |env| [200, {context: logger.in_context?}, ["OK"]] }
   end
 
   let(:env) { {"REQUEST_METHOD" => "GET", "PATH_INFO" => "/test"} }
@@ -40,7 +40,7 @@ RSpec.describe Lumberjack::Rails::Rack::ContextMiddleware do
 
     it "adds a context to both Rails and ActionController logger" do
       Rails.logger = Lumberjack::Logger.new(:test)
-      app = lambda { |env| [200, {rails: Rails.logger.context?, controller: logger.context?}, ["OK"]] }
+      app = lambda { |env| [200, {rails: Rails.logger.in_context?, controller: logger.in_context?}, ["OK"]] }
       middleware = Lumberjack::Rails::Rack::ContextMiddleware.new(app)
       response = middleware.call(env)
 

@@ -2,7 +2,7 @@
 
 module Lumberjack
   module Rails
-    module TaggedLocalLogger
+    module TaggedForkedLogger
       def tagged(*tags, &block)
         if parent_logger.respond_to?(:tagged)
           parent_logger.tagged(*tags, &block)

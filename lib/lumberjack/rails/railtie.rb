@@ -92,16 +92,16 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
 
     def set_standard_streams_to_loggers!(config, logger)
       return unless config.lumberjack&.log_rake_tasks
-      return unless logger.respond_to?(:local_logger) && logger.respond_to?(:puts)
+      return unless logger.respond_to?(:fork) && logger.respond_to?(:puts)
 
       if !$stdout.tty? && !$stdout.is_a?(::Logger)
-        stdout_logger = logger.local_logger
+        stdout_logger = logger.fork
         stdout_logger.default_severity = :info
         $stdout = stdout_logger
       end
 
       if !$stderr.tty? && !$stderr.is_a?(::Logger)
-        stderr_logger = logger.local_logger
+        stderr_logger = logger.fork
         stderr_logger.default_severity = :warn
         $stderr = stderr_logger
       end

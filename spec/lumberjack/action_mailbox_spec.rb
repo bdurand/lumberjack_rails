@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../spec_helper"
+require "spec_helper"
 
 RSpec.describe "ActionMailbox integration" do
   require "action_mailbox"
@@ -13,7 +13,7 @@ RSpec.describe "ActionMailbox integration" do
     attr_accessor :test_logger
 
     def process
-      self.class.last_context_result = test_logger&.context?
+      self.class.last_context_result = test_logger&.in_context?
     end
   end
 

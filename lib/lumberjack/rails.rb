@@ -6,6 +6,11 @@ require "active_support"
 module Lumberjack
   module Rails
     class << self
+      # Safely wrap Rails.logger with a Lumberjack context.
+      #
+      # @param additional_logger [Logger] an optional additional logger to wrap with a context.
+      # @yield [Logger] the block to execute with the wrapped logger context.
+      # @return [Object] the result of the block execution.
       def logger_context(additional_logger = nil, &block)
         rails_logger = ::Rails.logger
         if additional_logger && rails_logger != additional_logger
@@ -34,7 +39,7 @@ require_relative "rails/broadcast_logger_extension"
 require_relative "rails/log_at_level"
 require_relative "rails/rack/context_middleware"
 require_relative "rails/rack/tag_logs_middleware"
-require_relative "rails/tagged_local_logger"
+require_relative "rails/tagged_forked_logger"
 require_relative "rails/tagged_logger"
 require_relative "rails/tagged_logging_formatter"
 
@@ -52,7 +57,7 @@ Lumberjack::ContextLogger.prepend(Lumberjack::Rails::LogAtLevel)
 # Add tagged logging support to Lumberjack
 Lumberjack::ContextLogger.prepend(ActiveSupport::TaggedLogging)
 Lumberjack::Logger.prepend(Lumberjack::Rails::TaggedLogger)
-Lumberjack::LocalLogger.include(Lumberjack::Rails::TaggedLocalLogger)
+Lumberjack::ForkedLogger.include(Lumberjack::Rails::TaggedForkedLogger)
 
 ActiveSupport::BroadcastLogger.prepend(Lumberjack::Rails::BroadcastLoggerExtension)
 
