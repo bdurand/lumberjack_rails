@@ -4,7 +4,7 @@ module Lumberjack
   module Rails
     # This Rack middleware provides a convenient way to set up logger attributes for each request.
     # The attributes are defined in a callable object that must return a hash. Attributes will be applied
-    # to all Lumberjack loggers.
+    # to Rails.logger.
     class Middleware
       # @param app [#call] The Rack application.
       # @param attributes_block [Proc] A callable object that returns a hash of logger attributes.
@@ -18,19 +18,16 @@ module Lumberjack
       end
 
       def call(env)
-        logger_attributes = request_logger_attributes(env) if @attributes_block
-        if logger_attributes.is_a?(Hash)
-          Lumberjack.tag(logger_attributes) do
-            @app.call(env)
-          end
-        else
+        Lumberjack::Rails.logger_context do
+          attributes = logger_attributes(env) if @attributes_block
+          ::Rails.logger&.tag(attributes) if attributes.is_a?(Hash)
           @app.call(env)
         end
       end
 
       private
 
-      def request_logger_attributes(env)
+      def logger_attributes(env)
         request = ActionDispatch::Request.new(env)
         @attributes_block&.call(request)
       end

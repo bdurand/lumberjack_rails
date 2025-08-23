@@ -13,6 +13,10 @@ RSpec.describe Lumberjack::Rails::Middleware do
 
   let(:logger) { Lumberjack::Logger.new(:test) }
 
+  before do
+    Rails.logger = logger
+  end
+
   it "adds attributes to loggers for the request" do
     middleware = Lumberjack::Rails::Middleware.new(app, ->(request) { {method: request.method} })
     response = middleware.call(env)

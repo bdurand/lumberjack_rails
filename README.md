@@ -142,7 +142,7 @@ Contexts will be added via `around` callbacks to the following frameworks if the
 - ActionMailer
 - ActionMailbox
 
-In addition, a Rack middleware will be added to ensure a context is set on each request.
+In addition, a Rack middleware will be added to ensure a context is set on Rails.logger for each request.
 
 This allows you to change the log level or tag attributes on `Rails.logger` within your application code in these frameworks without affecting the global logger or the settings in any concurrent requests.
 

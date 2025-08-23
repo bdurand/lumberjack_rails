@@ -53,13 +53,7 @@ module Lumberjack
       end
 
       def tag(attributes, &block)
-        if block
-          dispatch_block_method(:tag, attributes, &block)
-        else
-          dispatch do |logger|
-            logger.tag(attributes)
-          end
-        end
+        dispatch_block_method(:tag, attributes, &block)
       end
 
       def context(&block)
@@ -107,7 +101,11 @@ module Lumberjack
       def dispatch_block_method(name, ...)
         loggers = broadcasts.select { |logger| logger.respond_to?(name) }
 
-        return yield if loggers.none?
+        if loggers.none?
+          result = yield if block_given?
+          return result
+        end
+
         return loggers.first.send(name, ...) if loggers.one?
 
         message = "BroadcastLogger cannot call #{name} on multiple loggers with a block."
