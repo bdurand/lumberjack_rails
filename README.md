@@ -83,13 +83,16 @@ config.lumberjack.device = STDOUT
 config.lumberjack.formatter = Lumberjack.build_formatter do
   add(ActiveRecord::Base, :id)
   attributes do
+    # Format the :tags attribute as tags (e.g. [tag1] [tag2])
+    add_attribute("tags", :tags)
+
     add_attribute("cost", :round, 2)
     add_class("User") { |user| {id: user.id, username: user.username} }
   end
 end
 
 # Use a custom template that adds the request id on all log entry lines.
-config.lumberjack.template = "[:time :severity :progname :request_id] :message -- :attributes"
+config.lumberjack.template = "[:time :severity :progname :request_id] :tags :message -- :attributes"
 config.lumberjack.additional_lines = "> :request_id :message"
 
 # Format log attributes as "[name=value]" (default is [name:value])

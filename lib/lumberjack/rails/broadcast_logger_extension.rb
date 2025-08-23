@@ -107,7 +107,7 @@ module Lumberjack
       def dispatch_block_method(name, ...)
         loggers = broadcasts.select { |logger| logger.respond_to?(name) }
 
-        return if loggers.none?
+        return yield if loggers.none?
         return loggers.first.send(name, ...) if loggers.one?
 
         message = "BroadcastLogger cannot call #{name} on multiple loggers with a block."

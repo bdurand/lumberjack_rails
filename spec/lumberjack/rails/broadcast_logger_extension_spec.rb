@@ -165,5 +165,66 @@ RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
       expect(logger.device).to include(severity: :warn, message: /It was called on this logger/)
       expect(other_logger.device).to include(severity: :warn, message: /It was not called on this logger/)
     end
+
+    context "when there is not a lumberjack logger" do
+      let(:logger) { Logger.new(StringIO.new) }
+      let(:broadcast_logger) { ActiveSupport::BroadcastLogger.new(logger) }
+
+      it "yields when calling log_at" do
+        n = 0
+        broadcast_logger.log_at(Logger::INFO) do
+          n += 1
+        end
+        expect(n).to eq(1)
+      end
+
+      it "yields when calling silence" do
+        n = 0
+        broadcast_logger.silence do
+          n += 1
+        end
+        expect(n).to eq(1)
+      end
+
+      it "yields when calling with_level" do
+        n = 0
+        broadcast_logger.with_level(:info) do
+          n += 1
+        end
+        expect(n).to eq(1)
+      end
+
+      it "yields when calling tag" do
+        n = 0
+        broadcast_logger.tag(foo: "bar") do
+          n += 1
+        end
+        expect(n).to eq(1)
+      end
+
+      it "yields when calling context" do
+        n = 0
+        broadcast_logger.context do
+          n += 1
+        end
+        expect(n).to eq(1)
+      end
+
+      it "yields when calling with_progname with a block" do
+        n = 0
+        broadcast_logger.with_progname("MyApp") do
+          n += 1
+        end
+        expect(n).to eq(1)
+      end
+
+      it "yields when calling untagged with a block" do
+        n = 0
+        broadcast_logger.untagged do
+          n += 1
+        end
+        expect(n).to eq(1)
+      end
+    end
   end
 end

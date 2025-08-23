@@ -10,7 +10,7 @@
 #     Whether to replace Rails.logger with Lumberjack::Logger
 #
 #   config.lumberjack.device (default: Rails log file)
-#     The device to write logs to (file path, IO object, etc.)
+#     The device to write logs to (file path, IO object, Lumberjack Device)
 #
 #   config.lumberjack.level (default: config.log_level)
 #     The log level for the Lumberjack logger
@@ -45,18 +45,19 @@
 #   config.lumberjack.device = STDOUT  # optional override
 class Lumberjack::Rails::Railtie < ::Rails::Railtie
   class << self
-    def lumberjack_logger(config, app_paths)
+    def lumberjack_logger(config, log_file_path = nil)
       return nil if config.logger
       return nil if config.lumberjack.nil? || config.lumberjack == false
-      return nil if config.lumberjack.empty? || config.lumberjack.enabled == false
+      return nil unless config.lumberjack.enabled
 
       # Determine the log device
       device = config.lumberjack.device
       if device.nil?
-        log_file_path = app_paths["log"]&.first
         if log_file_path
           FileUtils.mkdir_p(File.dirname(log_file_path)) unless File.exist?(File.dirname(log_file_path))
           device = log_file_path
+        else
+          device = $stdout
         end
       end
 
@@ -109,23 +110,19 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
   end
 
   config.lumberjack = ActiveSupport::OrderedOptions.new
+  config.lumberjack.enabled = true
+  config.lumberjack.log_rake_tasks = false
+  config.lumberjack.template = "[:timestamp :severity :progname (:pid)] :tags :message -- :attributes"
 
   initializer "lumberjack.configure_logger", before: :initialize_logger do |app|
-    logger = Lumberjack::Rails::Railtie.lumberjack_logger(app.config, app.paths)
+    logger = Lumberjack::Rails::Railtie.lumberjack_logger(app.config, app.paths["log"]&.first)
     app.config.logger = logger if logger
   end
 
-  initializer "lumberjack.insert_context_middleware", before: :build_middleware_stack do |app|
-    # Add the ContextMiddleware to the very start of the middleware chain
-    # This ensures that all subsequent middleware and the application itself
-    # run within the Lumberjack logger context
-    if app.config.lumberjack&.enabled != false
-      app.middleware.insert_before 0, Lumberjack::Rails::Rack::ContextMiddleware
-    end
-  end
+  initializer "lumberjack.insert_middleware" do |app|
+    next unless app.config.lumberjack&.enabled
 
-  initializer "lumberjack.insert_tag_logs_middleware", after: :build_middleware_stack do |app|
-    next if app.config.lumberjack&.enabled != false
+    app.middleware.insert_before(0, Lumberjack::Rails::Rack::ContextMiddleware)
 
     attributes_block = app.config.lumberjack.tag_request_logs
     if attributes_block.is_a?(Hash)
@@ -137,9 +134,9 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
     # Insert after ActionDispatch::RequestId or fallback to after ContextMiddleware
     request_id_middleware = app.middleware.detect { |middleware| middleware.klass == ActionDispatch::RequestId }
     if request_id_middleware
-      app.middleware.insert_after ActionDispatch::RequestId, Lumberjack::Rails::Rack::TagLogsMiddleware, attributes_block
+      app.middleware.insert_after(ActionDispatch::RequestId, Lumberjack::Rails::Rack::TagLogsMiddleware, attributes_block)
     else
-      app.middleware.insert_after Lumberjack::Rails::Rack::ContextMiddleware, Lumberjack::Rails::Rack::TagLogsMiddleware, attributes_block
+      app.middleware.insert_after(Lumberjack::Rails::Rack::ContextMiddleware, Lumberjack::Rails::Rack::TagLogsMiddleware, attributes_block)
     end
   end
 

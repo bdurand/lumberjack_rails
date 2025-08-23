@@ -9,15 +9,12 @@ RSpec.describe "Railtie" do
   let(:config) do
     ActiveSupport::OrderedOptions.new.tap do |cfg|
       cfg.lumberjack = ActiveSupport::OrderedOptions.new
+      cfg.lumberjack.enabled = true
     end
   end
 
-  let(:paths) do
-    Rails::Paths::Root.new(Pathname.new(Dir.tmpdir))
-  end
-
   describe ".lumberjack_logger" do
-    let(:logger) { Lumberjack::Rails::Railtie.lumberjack_logger(config, paths) }
+    let(:logger) { Lumberjack::Rails::Railtie.lumberjack_logger(config, nil) }
 
     context "when lumberjack is not configured" do
       it "returns nil if config.lumbrjack is not defined" do
@@ -25,12 +22,7 @@ RSpec.describe "Railtie" do
         expect(logger).to be_nil
       end
 
-      it "returns nil if config.lumberjack is empty" do
-        config.lumberjack = ActiveSupport::OrderedOptions.new
-        expect(logger).to be_nil
-      end
-
-      it "returns nil if config.lumberjack.enabled is false" do
+      it "returns nil if config.lumberjack.enabled is not true" do
         config.lumberjack.enabled = false
         expect(logger).to be_nil
       end
@@ -57,15 +49,21 @@ RSpec.describe "Railtie" do
 
       it "uses the default log file if config.lumberjack.device is not set" do
         log_file_path = File.join(Dir.tmpdir, "test.log")
-        paths.add("log", with: "test.log")
+        config.lumberjack.device = nil
 
         begin
-          config.lumberjack.device = nil
-          expect(logger.device).to be_a(Lumberjack::Device::Writer)
+          logger = Lumberjack::Rails::Railtie.lumberjack_logger(config, log_file_path)
+          expect(logger.device).to be_a(Lumberjack::Device::LoggerFile)
           expect(logger.device.path).to eq(log_file_path)
         ensure
           FileUtils.rm_f(log_file_path)
         end
+      end
+
+      it "uses STDOUT if no device or log file is configured" do
+        config.lumberjack.device = nil
+        logger = Lumberjack::Rails::Railtie.lumberjack_logger(config, nil)
+        expect(logger.device.send(:stream)).to equal($stdout)
       end
 
       it "sets the logger level with config.log_level" do
