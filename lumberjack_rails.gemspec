@@ -4,7 +4,7 @@ Gem::Specification.new do |spec|
   spec.authors = ["Brian Durand"]
   spec.email = ["bbdurand@gmail.com"]
 
-  spec.summary = "TO_DO"
+  spec.summary = "Support for using the lumberjack logging library in Rails applications."
   spec.homepage = "https://github.com/bdurand/lumberjack_rails"
   spec.license = "MIT"
 

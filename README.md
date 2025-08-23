@@ -4,15 +4,103 @@
 [![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
 [![Gem Version](https://badge.fury.io/rb/lumberjack_rails.svg)](https://badge.fury.io/rb/lumberjack_rails)
 
-This gem provides a logging setup for using the [lumberjack](https://github.com/bdurand/lumberjack) gem with Rails applications.
+The `lumberjack_rails` gem provides support for using the [`lumberjack`](https://github.com/bdurand/lumberjack) logging library in Rails applications.
 
-- actionpack
-- activejob
-- actioncable
+Rails has some of its own extensions to the Ruby standard library logger, and this gem bridges the gap between the two logging systems to add Lumberjack features to the `Rails.logger` and Rails features to Lumberjack loggers.
 
 ## Usage
 
-TODO
+With this gem installed, your main application logger will be a Lumberjack logger. The logger that gets initialized is defined by your application's configuration.
+
+### Configuration Options
+
+#### `config.lumberjack.enabled`
+
+Enables or disables the Lumberjack logger. If this is set to `false`, then Lumberjack will not be used.
+
+#### `config.lumberjack.level`
+
+Sets the log level for the Lumberjack logger. This can be set to any valid log level supported by Lumberjack. This will defer to the standard Rails `config.log_level` setting or default to `:debug` if neither is set.
+
+#### `config.lumberjack.device`
+
+The device to write logs to (file path, IO object, etc.). Defaults to the Rails log file.
+
+#### `config.lumberjack.global_attributes`
+
+Hash of attributes to apply to all log messages. These attributes will be included in every log entry.
+
+#### `config.lumberjack.shift_age`
+
+The age (in seconds) of log files before they are rotated, or a shift name (`daily`, `weekly`, `monthly`). Defaults to `0` (no rotation by age).
+
+#### `config.lumberjack.shift_size`
+
+The size (in bytes) of log files before they are rotated if `shift_age` is set to `0`. Defaults to `1048576` (1MB).
+
+#### `config.lumberjack.log_rake_tasks`
+
+Whether to redirect `$stdout` and `$stderr` to `Rails.logger` for rake tasks that depend on the `:environment` task when using a Lumberjack::Logger. Defaults to `false`. This is useful for adding some structure around output from `db:migrate` and other rake tasks in production.
+
+> [!NOTE]
+> This setting is ignored when running in an interactive terminal session.
+
+#### `config.lumberjack.tag_request_logs`
+
+A proc or hash to add tags to log entries for each Rack request. If this is a proc, it will be called with the request object. If this is a hash, it will be used as static tags for all requests.
+
+#### Additional Options
+
+All other options in the `config.lumberjack` namespace are passed as options to the Lumberjack logger constructor, allowing you to configure any other Lumberjack-specific settings.
+
+So, if you want to set a specific log format, you could set `config.lumberjack.template` to a [custom template](https://github.com/bdurand/lumberjack/blob/main/lib/lumberjack/template.rb) string. You can build your logger formatter with `config.lumberjack.formatter`.
+
+#### Example Configuration
+
+Here's an example of how you might configure Lumberjack in your `config/application.rb`:
+
+```ruby
+config.log_level = :info
+
+config.lumberjack.global_attributes = {
+  app: Rails.application.name,
+  host: Lumberjack::Utils.hostname,
+  pid: Lumberjack::Utils.global_pid
+}
+
+config.lumberjack.device = STDOUT
+
+# Build the log entry formatters
+config.lumberjack.formatter = Lumberjack.build_formatter do
+  add(ActiveRecord::Base, :id)
+  attributes do
+    add_attribute("cost", :round, 2)
+    add_class("User") { |user| {id: user.id, username: user.username} }
+  end
+end
+
+# Add the request id to all web requests
+config.lumberjack.tag_request_logs = {request_id: -> (request) { request.request_id }}
+
+# Convert db:migrate and other rails task output to log entries
+config.lumberjack.log_rake_tasks = true
+```
+
+### Lumberjack Contexts
+
+Contexts are used in Lumberjack to provide isolation for changes to your logger. Within a context block, you can change the log level, progname, or attributes and they will only apply within that block execution.
+
+Contexts will be added via `around` callbacks to the following frameworks if they are installed:
+
+- ActionController
+- ActiveJob
+- ActionCable
+- ActionMailer
+- ActionMailbox
+
+In addition, a Rack middleware will be added to ensure a context is set on each request.
+
+This allows you to change the log level or tag attributes on `Rails.logger` within your application code in these frameworks without affecting the global logger or the settings in any concurrent requests.
 
 ## Installation
 
@@ -23,11 +111,13 @@ gem 'lumberjack_rails'
 ```
 
 And then execute:
+
 ```bash
 $ bundle
 ```
 
 Or install it yourself as:
+
 ```bash
 $ gem install lumberjack_rails
 ```
