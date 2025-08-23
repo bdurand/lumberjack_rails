@@ -40,7 +40,10 @@ The size (in bytes) of log files before they are rotated if `shift_age` is set t
 
 #### `config.lumberjack.log_rake_tasks`
 
-Whether to redirect `$stdout` and `$stderr` to `Rails.logger` for rake tasks that depend on the `:environment` task when using a Lumberjack::Logger. Defaults to `false`. This is useful for adding some structure around output from `db:migrate` and other rake tasks in production.
+Whether to redirect `$stdout` and `$stderr` to `Rails.logger` for rake tasks that depend on the `:environment` task when using a Lumberjack::Logger. Defaults to `false`.
+
+> [!TIP]
+> This is useful for getting output from `db:migrate` and other rake tasks run in production into your logs. It can often be difficult to track down issues in these tasks without proper logging.
 
 > [!NOTE]
 > This setting is ignored when running in an interactive terminal session.
