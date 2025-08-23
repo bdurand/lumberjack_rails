@@ -32,11 +32,11 @@ Hash of attributes to apply to all log messages. These attributes will be includ
 
 #### `config.lumberjack.shift_age`
 
-The age (in seconds) of log files before they are rotated, or a shift name (`daily`, `weekly`, `monthly`). Defaults to `0` (no rotation by age).
+The age (in seconds) of log files before they are rotated, or a shift name (`daily`, `weekly`, `monthly`). The default is no log rotation. See the [logger](https://github.com/ruby/logger) gem documentation for details.
 
 #### `config.lumberjack.shift_size`
 
-The size (in bytes) of log files before they are rotated if `shift_age` is set to `0`. Defaults to `1048576` (1MB).
+The size (in bytes) of log files before they are rotated if `shift_age` is set to an integer. Defaults to `1048576` (1MB). See the [logger](https://github.com/ruby/logger) gem documentation for details.
 
 #### `config.lumberjack.log_rake_tasks`
 
@@ -52,6 +52,9 @@ Whether to redirect `$stdout` and `$stderr` to `Rails.logger` for rake tasks tha
 
 A proc or hash to add tags to log entries for each Rack request. If this is a proc, it will be called with the request object. If this is a hash, it will be used as static tags for all requests.
 
+> [!TIP]
+> You can use this feature to add both static
+
 #### Additional Options
 
 All other options in the `config.lumberjack` namespace are passed as options to the Lumberjack logger constructor, allowing you to configure any other Lumberjack-specific settings.
@@ -65,15 +68,18 @@ Here's an example of how you might configure Lumberjack in your `config/applicat
 ```ruby
 config.log_level = :info
 
+# Set the program name on the logger
+config.lumberjack.progname = Rails.application.railtie_name
+
+# Add values we want on all log entries
 config.lumberjack.global_attributes = {
-  app: Rails.application.name,
-  host: Lumberjack::Utils.hostname,
-  pid: Lumberjack::Utils.global_pid
+  host: Lumberjack::Utils.hostname, # Ensures hostname is UTF-8 encoded
+  pid: Lumberjack::Utils.global_pid # Returns a global PID value across all hosts
 }
 
 config.lumberjack.device = STDOUT
 
-# Build the log entry formatters
+# Build the log entry formatter
 config.lumberjack.formatter = Lumberjack.build_formatter do
   add(ActiveRecord::Base, :id)
   attributes do
@@ -82,12 +88,22 @@ config.lumberjack.formatter = Lumberjack.build_formatter do
   end
 end
 
+# Use a custom template that adds the request id on all log entry lines.
+config.lumberjack.template = "[:time :severity :progname :request_id] :message -- :attributes"
+config.lumberjack.additional_lines = "> :request_id :message"
+
+# Format log attributes as "[name=value]" (default is [name:value])
+config.lumberjack.attribute_format = "[name=value]"
+
 # Add the request id to all web requests
 config.lumberjack.tag_request_logs = {request_id: -> (request) { request.request_id }}
 
 # Convert db:migrate and other rails task output to log entries
 config.lumberjack.log_rake_tasks = true
 ```
+
+> ![TIP]
+> If you are using a logging pipeline in production that supports [JSONL](https://jsonlines.org/) logs, then check out the [`lumberjack_json_device`](https://github.com/bdurand/lumberjack_json_device). The gem provides a mechanism for defining the JSON schema for your logs and outputing them to JSONL.
 
 ### Lumberjack Contexts
 
