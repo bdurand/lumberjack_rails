@@ -13,12 +13,14 @@ module Lumberjack
       # @return [Object] the result of the block execution.
       def logger_context(additional_logger = nil, &block)
         rails_logger = ::Rails.logger
-        if additional_logger && rails_logger != additional_logger
-          wrap_block_with_logger_context(rails_logger) do
-            wrap_block_with_logger_context(additional_logger, &block)
+        Lumberjack.context do
+          if additional_logger && rails_logger != additional_logger
+            wrap_block_with_logger_context(rails_logger) do
+              wrap_block_with_logger_context(additional_logger, &block)
+            end
+          else
+            wrap_block_with_logger_context(rails_logger, &block)
           end
-        else
-          wrap_block_with_logger_context(rails_logger, &block)
         end
       end
 
