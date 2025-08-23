@@ -108,6 +108,24 @@ config.lumberjack.log_rake_tasks = true
 > ![TIP]
 > If you are using a logging pipeline in production that supports [JSONL](https://jsonlines.org/) logs, then check out the [`lumberjack_json_device`](https://github.com/bdurand/lumberjack_json_device). The gem provides a mechanism for defining the JSON schema for your logs and outputing them to JSONL.
 
+### TaggedLogger
+
+Rails has its own solution for logging metadata in the `tagged` method added to logger which can add an array of tags to log entries.
+
+Lumberjack supports the `tagged` method and will put the tags into the `tags` attribute. You can format these similar to how Rails formats them in the logger template with the `:tags` formatter.
+
+```ruby
+# The :tags placeholder will be replaced with the tags attribute. This is the default template.
+config.lumberjack.template = "[:timestamp :severity :progname (:pid)] :tags :message -- :attributes"
+
+# Add the :tags formatter. If you don't do this, then the tags will be formatted as an inspected array.
+config.formatter = Lumberjack.build_formatter do
+  attributes do
+    add_attribute(:tags, :tags)
+  end
+end
+```
+
 ### Lumberjack Contexts
 
 Contexts are used in Lumberjack to provide isolation for changes to your logger. Within a context block, you can change the log level, progname, or attributes and they will only apply within that block execution.
