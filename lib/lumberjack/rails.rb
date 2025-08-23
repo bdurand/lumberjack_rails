@@ -45,6 +45,11 @@ require_relative "rails/tagged_forked_logger"
 require_relative "rails/tagged_logger"
 require_relative "rails/tagged_logging_formatter"
 
+# Remove deprecated methods on Lumberjack::Logger that are implemented by ActiveSupport
+Lumberjack::Logger.remove_method(:tagged) if Lumberjack::Logger.instance_methods.include?(:tagged)
+Lumberjack::Logger.remove_method(:log_at) if Lumberjack::Logger.instance_methods.include?(:log_at)
+Lumberjack::Logger.remove_method(:silence) if Lumberjack::Logger.instance_methods.include?(:silence)
+
 # Add tagged logging support to the Lumberjack::EntryFormatter
 Lumberjack::EntryFormatter.prepend(Lumberjack::Rails::TaggedLoggingFormatter)
 Lumberjack::EntryFormatter.include(ActiveSupport::TaggedLogging::Formatter)

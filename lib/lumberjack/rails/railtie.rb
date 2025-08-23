@@ -30,6 +30,9 @@
 #     Whether to redirect $stdout and $stderr to Rails.logger for rake tasks
 #     that depend on the :environment task when using a Lumberjack::Logger
 #
+#   config.lumberjack.middleware (default: true)
+#     Whether to install Rack middleware that adds a Lumberjack context to each request.
+#
 #   config.lumberjack.tag_request_logs (default: nil)
 #     A proc or hash to add tags to log entries for each request. If a proc,
 #     it will be called with the request object. If a hash, it will be used
@@ -76,7 +79,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
 
       # Create logger options
       logger_options = config.lumberjack.to_h.except(
-        :enabled, :device, :level, :progname, :global_attributes, :shift_age, :shift_size, :log_rake_tasks, :tag_request_logs
+        :enabled, :device, :level, :progname, :global_attributes, :shift_age, :shift_size, :log_rake_tasks, :middleware, :tag_request_logs
       )
       logger_options.merge!(
         level: level,
@@ -111,6 +114,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
 
   config.lumberjack = ActiveSupport::OrderedOptions.new
   config.lumberjack.enabled = true
+  config.lumberjack.middleware = true
   config.lumberjack.log_rake_tasks = false
   config.lumberjack.template = "[:timestamp :severity :progname (:pid)] :tags :message -- :attributes"
 
@@ -120,23 +124,20 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
   end
 
   initializer "lumberjack.insert_middleware" do |app|
-    next unless app.config.lumberjack&.enabled
-
-    app.middleware.insert_before(0, Lumberjack::Rails::Rack::ContextMiddleware)
+    next unless app.config.lumberjack&.enabled && config.lumberjack.middleware
 
     attributes_block = app.config.lumberjack.tag_request_logs
     if attributes_block.is_a?(Hash)
       attributes_hash = attributes_block
       attributes_block = lambda { |request| attributes_hash }
     end
-    next unless attributes_block.respond_to?(:call)
 
     # Insert after ActionDispatch::RequestId or fallback to after ContextMiddleware
     request_id_middleware = app.middleware.detect { |middleware| middleware.klass == ActionDispatch::RequestId }
     if request_id_middleware
       app.middleware.insert_after(ActionDispatch::RequestId, Lumberjack::Rails::Rack::TagLogsMiddleware, attributes_block)
     else
-      app.middleware.insert_after(Lumberjack::Rails::Rack::ContextMiddleware, Lumberjack::Rails::Rack::TagLogsMiddleware, attributes_block)
+      app.middleware.use(Lumberjack::Rails::Rack::TagLogsMiddleware, attributes_block)
     end
   end
 

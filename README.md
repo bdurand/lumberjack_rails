@@ -48,6 +48,10 @@ Whether to redirect `$stdout` and `$stderr` to `Rails.logger` for rake tasks tha
 > [!NOTE]
 > This setting is ignored when running in an interactive terminal session.
 
+#### `config.lumberjack.middleware`
+
+Whether to install Rack middleware that adds a Lumberjack context to each request. Defaults to `true`.
+
 #### `config.lumberjack.tag_request_logs`
 
 A proc or hash to add tags to log entries for each Rack request. If this is a proc, it will be called with the request object. If this is a hash, it will be used as static tags for all requests.
