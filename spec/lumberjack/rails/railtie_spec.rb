@@ -78,7 +78,7 @@ RSpec.describe "Railtie" do
       end
 
       it "adds config.lumberjack.attributes to the logger" do
-        config.lumberjack.global_attributes = {foo: "bar"}
+        config.lumberjack.attributes = {foo: "bar"}
         expect(logger.attributes).to eq("foo" => "bar")
       end
 
@@ -88,7 +88,7 @@ RSpec.describe "Railtie" do
       end
 
       it "merges config.lumberjack.attributes and config.log_tags" do
-        config.lumberjack.global_attributes = {baz: "qux"}
+        config.lumberjack.attributes = {baz: "qux"}
         config.log_tags = ["foo", "bar"]
         expect(logger.attributes).to eq("baz" => "qux", "tags" => ["foo", "bar"])
       end

@@ -26,7 +26,7 @@ Sets the log level for the Lumberjack logger. This can be set to any valid log l
 
 The device to write logs to (file path, IO object, etc.). Defaults to the Rails log file.
 
-#### `config.lumberjack.global_attributes`
+#### `config.lumberjack.attributes`
 
 Hash of attributes to apply to all log messages. These attributes will be included in every log entry.
 
@@ -52,7 +52,7 @@ Whether to redirect `$stdout` and `$stderr` to `Rails.logger` for rake tasks tha
 
 Whether to install Rack middleware that adds a Lumberjack context to each request. Defaults to `true`.
 
-#### `config.lumberjack.tag_request_logs`
+#### `config.lumberjack.request_attributes`
 
 A proc or hash to add tags to log entries for each Rack request. If this is a proc, it will be called with the request object. If this is a hash, it will be used as static tags for all requests.
 
@@ -76,7 +76,7 @@ config.log_level = :info
 config.lumberjack.progname = Rails.application.railtie_name
 
 # Add values we want on all log entries
-config.lumberjack.global_attributes = {
+config.lumberjack.attributes = {
   host: Lumberjack::Utils.hostname, # Ensures hostname is UTF-8 encoded
   pid: Lumberjack::Utils.global_pid # Returns a global PID value across all hosts
 }
@@ -103,7 +103,7 @@ config.lumberjack.additional_lines = "> :request_id :message"
 config.lumberjack.attribute_format = "[name=value]"
 
 # Add the request id to all web requests
-config.lumberjack.tag_request_logs = {request_id: -> (request) { request.request_id }}
+config.lumberjack.request_attributes = {request_id: -> (request) { request.request_id }}
 
 # Convert db:migrate and other rails task output to log entries
 config.lumberjack.log_rake_tasks = true

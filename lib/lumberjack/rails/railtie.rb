@@ -15,7 +15,7 @@
 #   config.lumberjack.level (default: config.log_level)
 #     The log level for the Lumberjack logger
 #
-#   config.lumberjack.global_attributes (default: nil)
+#   config.lumberjack.attributes (default: nil)
 #     Attributes to apply to log messages
 #
 #   config.lumberjack.shift_age (default: 0)
@@ -33,7 +33,7 @@
 #   config.lumberjack.middleware (default: true)
 #     Whether to install Rack middleware that adds a Lumberjack context to each request.
 #
-#   config.lumberjack.tag_request_logs (default: nil)
+#   config.lumberjack.request_attributes (default: nil)
 #     A proc or hash to add tags to log entries for each request. If a proc,
 #     it will be called with the request object. If a hash, it will be used
 #     as static tags for all requests.
@@ -68,7 +68,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       level = config.lumberjack.level || config.log_level || :debug
 
       # Get default attributes
-      attributes = config.lumberjack.global_attributes
+      attributes = config.lumberjack.attributes
       if config.log_tags
         attributes ||= {}
         attributes["tags"] = config.log_tags
@@ -79,7 +79,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
 
       # Create logger options
       logger_options = config.lumberjack.to_h.except(
-        :enabled, :device, :level, :progname, :global_attributes, :shift_age, :shift_size, :log_rake_tasks, :middleware, :tag_request_logs
+        :enabled, :device, :level, :progname, :attributes, :shift_age, :shift_size, :log_rake_tasks, :middleware, :request_attributes
       )
       logger_options.merge!(
         level: level,
@@ -127,13 +127,13 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
   initializer "lumberjack.insert_middleware" do |app|
     next unless app.config.lumberjack&.enabled && config.lumberjack.middleware
 
-    attributes_block = app.config.lumberjack.tag_request_logs
+    attributes_block = app.config.lumberjack.request_attributes
     if attributes_block.is_a?(Hash)
       attributes_hash = attributes_block
       attributes_block = lambda { |request| attributes_hash }
     end
 
-    app.middleware.use(Lumberjack::Rails::Rack::TagLogsMiddleware, attributes_block)
+    app.middleware.use(Lumberjack::Rails::Middleware, attributes_block)
   end
 
   config.after_initialize do
