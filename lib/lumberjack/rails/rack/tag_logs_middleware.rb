@@ -13,14 +13,14 @@ module Lumberjack
           @app = app
           @attributes_block = attributes_block
 
-          unless @attributes_block.respond_to?(:call)
+          if @attributes_block && !@attributes_block.respond_to?(:call)
             raise ArgumentError.new("attributes_block must respond to call")
           end
         end
 
         def call(env)
           request = ActionDispatch::Request.new(env)
-          logger_attributes = @attributes_block.call(request)
+          logger_attributes = @attributes_block&.call(request)
           if logger_attributes.is_a?(Hash)
             Lumberjack.tag(logger_attributes) do
               @app.call(env)

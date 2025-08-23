@@ -116,7 +116,8 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
   config.lumberjack.enabled = true
   config.lumberjack.middleware = true
   config.lumberjack.log_rake_tasks = false
-  config.lumberjack.template = "[:timestamp :severity :progname (:pid)] :tags :message -- :attributes"
+  config.lumberjack.template = "[:time :severity :progname (:pid)] :tags :message -- :attributes"
+  config.lumberjack.pad_severity = true
 
   initializer "lumberjack.configure_logger", before: :initialize_logger do |app|
     logger = Lumberjack::Rails::Railtie.lumberjack_logger(app.config, app.paths["log"]&.first)
@@ -132,13 +133,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       attributes_block = lambda { |request| attributes_hash }
     end
 
-    # Insert after ActionDispatch::RequestId or fallback to after ContextMiddleware
-    request_id_middleware = app.middleware.detect { |middleware| middleware.klass == ActionDispatch::RequestId }
-    if request_id_middleware
-      app.middleware.insert_after(ActionDispatch::RequestId, Lumberjack::Rails::Rack::TagLogsMiddleware, attributes_block)
-    else
-      app.middleware.use(Lumberjack::Rails::Rack::TagLogsMiddleware, attributes_block)
-    end
+    app.middleware.use(Lumberjack::Rails::Rack::TagLogsMiddleware, attributes_block)
   end
 
   config.after_initialize do

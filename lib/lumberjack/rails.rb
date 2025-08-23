@@ -42,7 +42,6 @@ require_relative "rails/log_at_level"
 require_relative "rails/rack/context_middleware"
 require_relative "rails/rack/tag_logs_middleware"
 require_relative "rails/tagged_forked_logger"
-require_relative "rails/tagged_logger"
 require_relative "rails/tagged_logging_formatter"
 
 # Remove deprecated methods on Lumberjack::Logger that are implemented by ActiveSupport
@@ -63,7 +62,6 @@ Lumberjack::ContextLogger.prepend(Lumberjack::Rails::LogAtLevel)
 
 # Add tagged logging support to Lumberjack
 Lumberjack::ContextLogger.prepend(ActiveSupport::TaggedLogging)
-Lumberjack::Logger.prepend(Lumberjack::Rails::TaggedLogger)
 Lumberjack::ForkedLogger.include(Lumberjack::Rails::TaggedForkedLogger)
 
 ActiveSupport::BroadcastLogger.prepend(Lumberjack::Rails::BroadcastLoggerExtension)

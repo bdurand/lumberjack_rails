@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Lumberjack::Rails::TaggedLogger do
+RSpec.describe ActiveSupport::TaggedLogging do
   let(:out) { StringIO.new }
   let(:logger) { Lumberjack::Logger.new(out, level: :info, template: ":message - :attributes") }
 
@@ -22,17 +22,6 @@ RSpec.describe Lumberjack::Rails::TaggedLogger do
     tagged_logger = ActiveSupport::TaggedLogging.new(logger)
     tagged_logger.tagged("foo", "bar") { tagged_logger.info("test", bip: "bap") }
     expect(out.string.chomp).to eq "test - [bip:bap] [tags:[\"foo\", \"bar\"]]"
-  end
-
-  it "can be configured with helpers to format tags like ActiveSupport::TaggedLogging does" do
-    logger = Lumberjack::Logger.new(
-      out,
-      template: Lumberjack::Rails::TaggedLogger.template,
-      formatter: Lumberjack::Rails::TaggedLogger.entry_formatter
-    )
-    tagged_logger = ActiveSupport::TaggedLogging.new(logger)
-    tagged_logger.tagged("foo", "bar") { tagged_logger.info("test", bar: "baz") }
-    expect(out.string.chomp).to end_with("[foo] [bar] test [bar:baz]")
   end
 
   it "should still work for other kinds of loggers enhanced with ActiveSupport::TaggedLogging" do
