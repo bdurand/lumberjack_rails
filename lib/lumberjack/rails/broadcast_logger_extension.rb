@@ -60,11 +60,23 @@ module Lumberjack
         dispatch_block_method(:context, &block)
       end
 
+      def append_to(attribute_name, *tag, &block)
+        dispatch_block_method(:append_to, attribute_name, *tag, &block)
+      end
+
+      def clear_attributes(&block)
+        dispatch_block_method(:clear_attributes, &block)
+      end
+
       def untagged(&block)
         dispatch_block_method(:untagged, &block)
       end
 
       def with_progname(value, &block)
+        dispatch_block_method(:with_progname, value, &block)
+      end
+
+      def set_progname(value, &block)
         dispatch_block_method(:with_progname, value, &block)
       end
 

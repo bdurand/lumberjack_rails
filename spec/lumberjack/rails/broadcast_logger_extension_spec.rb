@@ -136,6 +136,16 @@ RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
       expect(other_logger.device).to include(severity: :warn, message: /It was not called on this logger/)
     end
 
+    it "does not yield multiple when calling append_to with a block and logs warnings" do
+      n = 0
+      broadcast_logger.append_to(:foo, "bar", "baz") do
+        n += 1
+      end
+      expect(n).to eq(1)
+      expect(logger.device).to include(severity: :warn, message: /It was called on this logger/)
+      expect(other_logger.device).to include(severity: :warn, message: /It was not called on this logger/)
+    end
+
     it "does not yield multiple when calling context with a block and logs warnings" do
       n = 0
       broadcast_logger.context do
@@ -156,14 +166,38 @@ RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
       expect(other_logger.device).to include(severity: :warn, message: /It was not called on this logger/)
     end
 
-    it "does not yield multiple when calling untagged with a block and logs warnings" do
+    it "does not yield multiple when calling set_progname with a block and logs warnings" do
+      silence_deprecations do
+        n = 0
+        broadcast_logger.set_progname("MyApp") do
+          n += 1
+        end
+        expect(n).to eq(1)
+        expect(logger.device).to include(severity: :warn, message: /It was called on this logger/)
+        expect(other_logger.device).to include(severity: :warn, message: /It was not called on this logger/)
+      end
+    end
+
+    it "does not yield multiple when calling clear_attributes with a block and logs warnings" do
       n = 0
-      broadcast_logger.untagged do
+      broadcast_logger.clear_attributes do
         n += 1
       end
       expect(n).to eq(1)
       expect(logger.device).to include(severity: :warn, message: /It was called on this logger/)
       expect(other_logger.device).to include(severity: :warn, message: /It was not called on this logger/)
+    end
+
+    it "does not yield multiple when calling untagged with a block and logs warnings" do
+      silence_deprecations do
+        n = 0
+        broadcast_logger.untagged do
+          n += 1
+        end
+        expect(n).to eq(1)
+        expect(logger.device).to include(severity: :warn, message: /It was called on this logger/)
+        expect(other_logger.device).to include(severity: :warn, message: /It was not called on this logger/)
+      end
     end
 
     context "when there is not a lumberjack logger" do
@@ -225,6 +259,49 @@ RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
         end
         expect(n).to eq(1)
       end
+    end
+  end
+
+  describe "method coverage" do
+    it "should handle all Lumberjack::Logger methods that take blocks" do
+      # Get all Lumberjack::Logger methods that can accept blocks
+      logger = Lumberjack::Logger.new(StringIO.new)
+      lumberjack_block_methods = []
+
+      # Check Lumberjack::Logger and its included modules for methods that accept blocks
+      [Lumberjack::Logger, Lumberjack::ContextLogger].each do |klass|
+        klass.instance_methods(false).each do |method_name|
+          method_obj = klass.instance_method(method_name)
+          # Check if method can take a block by looking at parameters
+          params = method_obj.parameters
+          if params.any? { |param| param[0] == :block }
+            lumberjack_block_methods << method_name
+          end
+        rescue => e
+          # Skip methods that can't be introspected
+        end
+      end
+
+      # Get methods defined in BroadcastLoggerExtension
+      extension_methods = Lumberjack::Rails::BroadcastLoggerExtension.instance_methods(false)
+
+      # Filter out private methods and methods that don't need special handling
+      excluded_methods = [:trace, :add, :log]
+
+      expected_methods = lumberjack_block_methods - excluded_methods
+
+      # Check that all expected methods are implemented in BroadcastLoggerExtension
+      missing_methods = expected_methods - extension_methods
+
+      expect(missing_methods).to be_empty,
+        "BroadcastLoggerExtension is missing implementations for these Lumberjack::Logger block methods: #{missing_methods.sort.join(", ")}"
+
+      # Also verify that we're not implementing methods that don't exist
+      lumberjack_all_methods = logger.class.instance_methods
+      extra_methods = extension_methods - lumberjack_all_methods - [:fork] # fork is a special case
+
+      expect(extra_methods).to be_empty,
+        "BroadcastLoggerExtension implements methods that don't exist on Lumberjack::Logger: #{extra_methods.sort.join(", ")}"
     end
   end
 end
