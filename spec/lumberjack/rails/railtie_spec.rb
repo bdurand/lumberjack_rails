@@ -61,9 +61,16 @@ RSpec.describe "Railtie" do
       end
 
       it "uses STDOUT if no device or log file is configured" do
-        config.lumberjack.device = nil
-        logger = Lumberjack::Rails::Railtie.lumberjack_logger(config, nil)
-        expect(logger.device.send(:stream)).to equal($stdout)
+        out = StringIO.new
+        save_stdout = $stdout
+        begin
+          $stdout = out
+          config.lumberjack.device = nil
+          logger = Lumberjack::Rails::Railtie.lumberjack_logger(config, nil)
+          expect(logger.device.dev).to equal($stdout)
+        ensure
+          $stdout = save_stdout
+        end
       end
 
       it "sets the logger level with config.log_level" do
