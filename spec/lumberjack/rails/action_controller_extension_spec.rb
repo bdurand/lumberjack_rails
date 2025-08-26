@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe "ActionController integration" do
+RSpec.describe Lumberjack::Rails::ActionControllerExtension do
   require "action_controller"
 
   class TestController < ActionController::Base

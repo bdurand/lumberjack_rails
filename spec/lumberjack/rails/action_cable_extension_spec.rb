@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe "ActionCable integration" do
+RSpec.describe Lumberjack::Rails::ActionCableExtension do
   require "action_cable"
 
   class TestConnection < ActionCable::Connection::Base

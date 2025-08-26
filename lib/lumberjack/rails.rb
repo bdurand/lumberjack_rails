@@ -37,6 +37,11 @@ module Lumberjack
   end
 end
 
+require_relative "rails/action_cable_extension"
+require_relative "rails/action_controller_extension"
+require_relative "rails/action_mailbox_extension"
+require_relative "rails/action_mailer_extension"
+require_relative "rails/active_job_extension"
 require_relative "rails/broadcast_logger_extension"
 require_relative "rails/log_at_level"
 require_relative "rails/middleware"
@@ -66,23 +71,23 @@ Lumberjack::ForkedLogger.include(Lumberjack::Rails::TaggedForkedLogger)
 ActiveSupport::BroadcastLogger.prepend(Lumberjack::Rails::BroadcastLoggerExtension)
 
 ActiveSupport.on_load(:active_job) do
-  ActiveJob::Base.around_perform { |_job, block| Lumberjack::Rails.logger_context(logger, &block) }
+  ActiveJob::Base.prepend(Lumberjack::Rails::ActiveJobExtension)
 end
 
 ActiveSupport.on_load(:action_cable) do
-  ActionCable::Connection::Base.around_command { |_command, block| Lumberjack::Rails.logger_context(logger, &block) }
+  ActionCable::Connection::Base.prepend(Lumberjack::Rails::ActionCableExtension)
 end
 
 ActiveSupport.on_load(:action_mailer) do
-  ActionMailer::Base.around_action { |_mail, block| Lumberjack::Rails.logger_context(logger, &block) }
+  ActionMailer::Base.prepend(Lumberjack::Rails::ActionMailerExtension)
 end
 
 ActiveSupport.on_load(:action_mailbox) do
-  ActionMailbox::Base.around_processing { |_mail, block| Lumberjack::Rails.logger_context(logger, &block) }
+  ActionMailbox::Base.prepend(Lumberjack::Rails::ActionMailboxExtension)
 end
 
 ActiveSupport.on_load(:action_controller) do
-  ActionController::Base.around_action { |_controller, block| Lumberjack::Rails.logger_context(logger, &block) }
+  ActionController::Base.prepend(Lumberjack::Rails::ActionControllerExtension)
 end
 
 if defined?(Rails::Railtie)

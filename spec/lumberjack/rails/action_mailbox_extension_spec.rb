@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe "ActionMailbox integration" do
+RSpec.describe Lumberjack::Rails::ActionMailboxExtension do
   require "action_mailbox"
 
   class TestMailbox < ActionMailbox::Base

@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe "ActiveJob integration" do
+RSpec.describe Lumberjack::Rails::ActiveJobExtension do
   require "active_job"
 
   # Test job classes
