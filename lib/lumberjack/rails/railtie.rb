@@ -48,6 +48,11 @@
 #   config.lumberjack.device = STDOUT  # optional override
 class Lumberjack::Rails::Railtie < ::Rails::Railtie
   class << self
+    # Create a Lumberjack logger based on Rails configuration.
+    #
+    # @param config [Rails::Application::Configuration] the Rails application configuration
+    # @param log_file_path [String, nil] optional path to the log file
+    # @return [Lumberjack::Logger, nil] the configured logger or nil if not enabled
     def lumberjack_logger(config, log_file_path = nil)
       return nil if config.logger
       return nil if config.lumberjack.nil? || config.lumberjack == false
@@ -94,6 +99,11 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       logger
     end
 
+    # Redirect standard streams ($stdout, $stderr) to logger instances.
+    #
+    # @param config [Rails::Application::Configuration] the Rails application configuration
+    # @param logger [Lumberjack::Logger] the logger to redirect streams to
+    # @return [void]
     def set_standard_streams_to_loggers!(config, logger)
       return unless config.lumberjack&.log_rake_tasks
       return unless logger.respond_to?(:fork) && logger.respond_to?(:puts)

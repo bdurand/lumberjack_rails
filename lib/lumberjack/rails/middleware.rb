@@ -17,6 +17,10 @@ module Lumberjack
         end
       end
 
+      # Process a request through the middleware stack with Lumberjack context.
+      #
+      # @param env [Hash] the Rack environment hash
+      # @return [Array] the Rack response array
       def call(env)
         Lumberjack::Rails.logger_context do
           attributes = logger_attributes(env) if @attributes_block
@@ -27,6 +31,10 @@ module Lumberjack
 
       private
 
+      # Extract logger attributes from the request environment.
+      #
+      # @param env [Hash] the Rack environment hash
+      # @return [Hash, nil] the logger attributes or nil if none
       def logger_attributes(env)
         request = ActionDispatch::Request.new(env)
         @attributes_block&.call(request)

@@ -3,7 +3,14 @@
 require "lumberjack"
 require "active_support"
 
+# Lumberjack is a logging framework for Ruby applications.
+# This gem extends Lumberjack with Rails-specific functionality.
 module Lumberjack
+  # Rails integration for Lumberjack logger.
+  #
+  # This module provides integration between Lumberjack and Rails applications,
+  # enhancing Rails' logging capabilities while maintaining compatibility with
+  # existing Rails logging patterns.
   module Rails
     class << self
       # Safely wrap Rails.logger with a Lumberjack context.
@@ -26,6 +33,11 @@ module Lumberjack
 
       private
 
+      # Wrap a block with a logger context if the logger supports it.
+      #
+      # @param logger [Logger] the logger to wrap
+      # @yield the block to execute within the logger context
+      # @return [Object] the result of the block execution
       def wrap_block_with_logger_context(logger, &block)
         if logger&.respond_to?(:context)
           logger.context(&block)
@@ -54,20 +66,27 @@ Lumberjack::Logger.remove_method(:log_at) if Lumberjack::Logger.instance_methods
 Lumberjack::Logger.remove_method(:silence) if Lumberjack::Logger.instance_methods.include?(:silence)
 
 # Add tagged logging support to the Lumberjack::EntryFormatter
+# @!visibility private
 Lumberjack::EntryFormatter.prepend(Lumberjack::Rails::TaggedLoggingFormatter)
+# @!visibility private
 Lumberjack::EntryFormatter.include(ActiveSupport::TaggedLogging::Formatter)
 
 # Add silence method to Lumberjack::Logger
 require "active_support/logger_silence"
+# @!visibility private
 Lumberjack::ContextLogger.include(ActiveSupport::LoggerSilence)
 
 # Use prepend to ensure level is overridden properly
+# @!visibility private
 Lumberjack::ContextLogger.prepend(Lumberjack::Rails::LogAtLevel)
 
 # Add tagged logging support to Lumberjack
+# @!visibility private
 Lumberjack::ContextLogger.prepend(ActiveSupport::TaggedLogging)
+# @!visibility private
 Lumberjack::ForkedLogger.include(Lumberjack::Rails::TaggedForkedLogger)
 
+# @!visibility private
 ActiveSupport::BroadcastLogger.prepend(Lumberjack::Rails::BroadcastLoggerExtension)
 
 ActiveSupport.on_load(:active_job) do
