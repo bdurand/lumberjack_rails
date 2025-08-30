@@ -4,7 +4,7 @@
 [![Ruby Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://github.com/testdouble/standard)
 [![Gem Version](https://badge.fury.io/rb/lumberjack_rails.svg)](https://badge.fury.io/rb/lumberjack_rails)
 
-The `lumberjack_rails` gem provides support for using the [`lumberjack`](https://github.com/bdurand/lumberjack) logging library in Rails applications.
+The `lumberjack_rails` gem provides support for using the [lumberjack](https://github.com/bdurand/lumberjack) logging library in Rails applications.
 
 Rails has some of its own extensions to the Ruby standard library logger, and this gem bridges the gap between the two logging systems to add Lumberjack features to the `Rails.logger` and Rails features to Lumberjack loggers.
 
@@ -110,7 +110,7 @@ config.lumberjack.log_rake_tasks = true
 ```
 
 > ![TIP]
-> If you are using a logging pipeline in production that supports [JSONL](https://jsonlines.org/) logs, then check out the [`lumberjack_json_device`](https://github.com/bdurand/lumberjack_json_device). The gem provides a mechanism for defining the JSON schema for your logs and outputing them to JSONL.
+> If you are using a logging pipeline in production that supports [JSONL](https://jsonlines.org/) logs, then check out the [lumberjack_json_device](https://github.com/bdurand/lumberjack_json_device). The gem provides a mechanism for defining the JSON schema for your logs and outputing them to JSONL.
 
 ### TaggedLogger
 
