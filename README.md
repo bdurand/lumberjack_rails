@@ -103,7 +103,7 @@ config.lumberjack.additional_lines = "> :request_id :message"
 config.lumberjack.attribute_format = "[name=value]"
 
 # Add the request id to all web requests
-config.lumberjack.request_attributes = {request_id: -> (request) { request.request_id }}
+config.lumberjack.request_attributes = { request_id: -> (request) { request.request_id } }
 
 # Convert db:migrate and other rails task output to log entries
 config.lumberjack.log_rake_tasks = true

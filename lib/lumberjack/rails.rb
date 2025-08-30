@@ -60,55 +60,8 @@ require_relative "rails/middleware"
 require_relative "rails/tagged_forked_logger"
 require_relative "rails/tagged_logging_formatter"
 
-# Remove deprecated methods on Lumberjack::Logger that are implemented by ActiveSupport
-Lumberjack::Logger.remove_method(:tagged) if Lumberjack::Logger.instance_methods.include?(:tagged)
-Lumberjack::Logger.remove_method(:log_at) if Lumberjack::Logger.instance_methods.include?(:log_at)
-Lumberjack::Logger.remove_method(:silence) if Lumberjack::Logger.instance_methods.include?(:silence)
+require_relative "rails/apply_patches"
 
-# Add tagged logging support to the Lumberjack::EntryFormatter
-# @!visibility private
-Lumberjack::EntryFormatter.prepend(Lumberjack::Rails::TaggedLoggingFormatter)
-# @!visibility private
-Lumberjack::EntryFormatter.include(ActiveSupport::TaggedLogging::Formatter)
-
-# Add silence method to Lumberjack::Logger
-require "active_support/logger_silence"
-# @!visibility private
-Lumberjack::ContextLogger.include(ActiveSupport::LoggerSilence)
-
-# Use prepend to ensure level is overridden properly
-# @!visibility private
-Lumberjack::ContextLogger.prepend(Lumberjack::Rails::LogAtLevel)
-
-# Add tagged logging support to Lumberjack
-# @!visibility private
-Lumberjack::ContextLogger.prepend(ActiveSupport::TaggedLogging)
-# @!visibility private
-Lumberjack::ForkedLogger.include(Lumberjack::Rails::TaggedForkedLogger)
-
-# @!visibility private
-ActiveSupport::BroadcastLogger.prepend(Lumberjack::Rails::BroadcastLoggerExtension)
-
-ActiveSupport.on_load(:active_job) do
-  ActiveJob::Base.prepend(Lumberjack::Rails::ActiveJobExtension)
-end
-
-ActiveSupport.on_load(:action_cable) do
-  ActionCable::Connection::Base.prepend(Lumberjack::Rails::ActionCableExtension)
-end
-
-ActiveSupport.on_load(:action_mailer) do
-  ActionMailer::Base.prepend(Lumberjack::Rails::ActionMailerExtension)
-end
-
-ActiveSupport.on_load(:action_mailbox) do
-  ActionMailbox::Base.prepend(Lumberjack::Rails::ActionMailboxExtension)
-end
-
-ActiveSupport.on_load(:action_controller) do
-  ActionController::Base.prepend(Lumberjack::Rails::ActionControllerExtension)
-end
-
-if defined?(Rails::Railtie)
+if defined?(::Rails::Railtie)
   require_relative "rails/railtie"
 end

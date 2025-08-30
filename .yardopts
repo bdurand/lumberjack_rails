@@ -1,0 +1,1 @@
+--exclude lib/lumberjack/rails/apply_patches.rb
