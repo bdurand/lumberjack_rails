@@ -92,6 +92,22 @@ module Lumberjack
         end
       end
 
+      # Add a log entry with the specified severity and optional attributes support.
+      #
+      # @param severity [Symbol, String, Integer] the log severity for the entry
+      # @param message_or_progname_or_attributes [String, Hash] the message, progname, or attributes
+      # @param progname_or_attributes [String, Hash] the progname or attributes
+      # @yield optional block that returns the message
+      # @return [void]
+      def add(severity, message_or_progname_or_attributes = nil, progname_or_attributes = nil, &block)
+        severity = Logger::Severity.coerce(severity)
+        dispatch do |logger|
+          call_add_with_attributes_arg(logger, severity, message_or_progname_or_attributes, progname_or_attributes, &block)
+        end
+      end
+
+      alias_method :log, :add
+
       # Override the with_level method defined on the logger gem to use Rails' log_at method instead.
       #
       # @param level [Symbol, Integer] the log level to set temporarily
@@ -197,6 +213,28 @@ module Lumberjack
           logger.send(method, progname, &block)
         else
           logger.send(method, message_or_progname_or_attributes)
+        end
+      end
+
+      # Lumberjack loggers support an optional attributes argument to the logging methods. This method provides
+      # compatibility with other Loggers that don't support that argument. The arguments here are funky because
+      # the methods on Logger#add are funky. On Logger the sole argument to a logging method can be message or
+      # the progname depending on if the message is in the block.
+      #
+      # @param logger [Logger] the logger to call the method on
+      # @param method [Symbol] the logging method to call
+      # @param message_or_progname_or_attributes [String, Hash] the message, progname, or attributes
+      # @param progname_or_attributes [String, Hash] the progname or attributes
+      # @yield optional block that returns the message
+      # @return [void]
+      def call_add_with_attributes_arg(logger, severity, message_or_progname_or_attributes, progname_or_attributes, &block)
+        if logger.is_a?(Lumberjack::ContextLogger)
+          logger.add(severity, message_or_progname_or_attributes, progname_or_attributes, &block)
+        elsif block
+          progname = message_or_progname_or_attributes unless progname_or_attributes.is_a?(Hash)
+          logger.add(severity, progname, &block)
+        else
+          logger.add(severity, message_or_progname_or_attributes)
         end
       end
 

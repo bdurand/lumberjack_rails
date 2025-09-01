@@ -5,7 +5,7 @@ require "spec_helper"
 RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
   describe "logging methods" do
     let(:out) { StringIO.new }
-    let(:logger) { Lumberjack::Logger.new(out, template: ":message - :attributes") }
+    let(:logger) { Lumberjack::Logger.new(out, template: ":progname :message - :attributes") }
     let(:standard_logger_out) { StringIO.new }
     let(:standard_logger) { ::Logger.new(standard_logger_out) }
     let(:broadcast_logger) { ActiveSupport::BroadcastLogger.new(logger, standard_logger) }
@@ -79,6 +79,24 @@ RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
       broadcast_logger.log(Logger::INFO, "Log message", foo: "bar")
       expect(out.string).to include("Log message - [foo:bar]")
       expect(standard_logger_out.string).to include("Log message")
+    end
+
+    it "can log with the progname when the message is in a block" do
+      broadcast_logger.info("MyApp") { "test" }
+      expect(out.string).to include("MyApp test")
+      expect(standard_logger_out.string).to include("MyApp")
+    end
+
+    it "can add an entry with a progname when the message is in a block" do
+      broadcast_logger.add(:info, "MyApp") { "test" }
+      expect(out.string).to include("MyApp test")
+      expect(standard_logger_out.string).to include("MyApp")
+    end
+
+    it "can log an entry with a progname when the message is in a block" do
+      broadcast_logger.log(:info, "MyApp") { "test" }
+      expect(out.string).to include("MyApp test")
+      expect(standard_logger_out.string).to include("MyApp")
     end
   end
 
