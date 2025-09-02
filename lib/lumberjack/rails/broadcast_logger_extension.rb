@@ -94,7 +94,7 @@ module Lumberjack
 
       # Add a log entry with the specified severity and optional attributes support.
       #
-      # @param severity [Symbol, String, Integer] the log severity for the entry
+      # @param severity [Integer, Symbol, String] the severity for the log entry
       # @param message_or_progname_or_attributes [String, Hash] the message, progname, or attributes
       # @param progname_or_attributes [String, Hash] the progname or attributes
       # @yield optional block that returns the message
@@ -222,7 +222,7 @@ module Lumberjack
       # the progname depending on if the message is in the block.
       #
       # @param logger [Logger] the logger to call the method on
-      # @param method [Symbol] the logging method to call
+      # @param severity [Integer, Symbol, String] the severity for the log entry
       # @param message_or_progname_or_attributes [String, Hash] the message, progname, or attributes
       # @param progname_or_attributes [String, Hash] the progname or attributes
       # @yield optional block that returns the message
