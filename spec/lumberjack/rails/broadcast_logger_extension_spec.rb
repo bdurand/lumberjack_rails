@@ -5,7 +5,7 @@ require "spec_helper"
 RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
   describe "logging methods" do
     let(:out) { StringIO.new }
-    let(:logger) { Lumberjack::Logger.new(out, template: ":progname :message - :attributes") }
+    let(:logger) { Lumberjack::Logger.new(out, template: "{{progname}} {{message}} - {{attributes}}") }
     let(:standard_logger_out) { StringIO.new }
     let(:standard_logger) { ::Logger.new(standard_logger_out) }
     let(:broadcast_logger) { ActiveSupport::BroadcastLogger.new(logger, standard_logger) }
@@ -102,7 +102,7 @@ RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
 
   describe "multiple yield protection" do
     let(:logger) { Lumberjack::Logger.new(:test) }
-    let(:other_logger) { Lumberjack::Logger.new(:test, template: ":message") }
+    let(:other_logger) { Lumberjack::Logger.new(:test, template: "{{message}}") }
     let(:broadcast_logger) do
       ActiveSupport::BroadcastLogger.new(logger).tap do |bl|
         bl.broadcasts << other_logger

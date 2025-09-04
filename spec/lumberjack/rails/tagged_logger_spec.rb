@@ -4,7 +4,7 @@ require "spec_helper"
 
 RSpec.describe ActiveSupport::TaggedLogging do
   let(:out) { StringIO.new }
-  let(:logger) { Lumberjack::Logger.new(out, level: :info, template: ":message - :attributes") }
+  let(:logger) { Lumberjack::Logger.new(out, level: :info, template: "{{message}} - {{attributes}}") }
 
   it "should wrap a Lumberjack logger as a tagged logger" do
     tagged_logger = ActiveSupport::TaggedLogging.new(logger)

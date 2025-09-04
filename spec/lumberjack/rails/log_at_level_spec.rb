@@ -4,11 +4,11 @@ require "spec_helper"
 
 RSpec.describe Lumberjack::Rails::LogAtLevel do
   let(:out) { StringIO.new }
-  let(:logger) { Lumberjack::Logger.new(out, level: :info, template: ":message") }
+  let(:logger) { Lumberjack::Logger.new(out, level: :info, template: "{{message}}") }
 
   it "should temporarily set the log level for a block" do
     out = StringIO.new
-    logger = Lumberjack::Logger.new(out, level: Logger::INFO, template: ":message")
+    logger = Lumberjack::Logger.new(out, level: Logger::INFO, template: "{{message}}")
     logger.info("one")
     logger.log_at(Logger::WARN) do
       expect(logger.level).to eq(Logger::WARN)

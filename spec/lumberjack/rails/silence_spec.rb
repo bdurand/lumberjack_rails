@@ -4,7 +4,7 @@ require "spec_helper"
 
 RSpec.describe Lumberjack::Rails::LogAtLevel do
   let(:out) { StringIO.new }
-  let(:logger) { Lumberjack::Logger.new(out, level: :info, template: ":message") }
+  let(:logger) { Lumberjack::Logger.new(out, level: :info, template: "{{message}}") }
 
   it "should be able to silence the log in a block" do
     logger.info("one")
