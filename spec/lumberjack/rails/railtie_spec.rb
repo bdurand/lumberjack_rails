@@ -109,6 +109,10 @@ RSpec.describe "Railtie" do
         config.lumberjack.format = :json
         expect(logger.device.options[:format]).to eq :json
       end
+
+      it "adds the id formatter for ActiveRecord models in attributes" do
+        expect(logger.attribute_formatter.formatter_for_class("ActiveRecord::Base")).to be_a(Lumberjack::Formatter::IdFormatter)
+      end
     end
   end
 

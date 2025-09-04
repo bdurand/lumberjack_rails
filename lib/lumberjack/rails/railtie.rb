@@ -95,8 +95,21 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       # Create the Lumberjack logger
       logger = Lumberjack::Logger.new(device, shift_age, shift_size, **logger_options)
       logger.tag!(attributes) if attributes
+      logger.formatter.prepend(active_record_entry_formatter)
 
       logger
+    end
+
+    # Build an entry formatter for ActiveRecord models to log them with their class and id
+    # when logged as attributes.
+    #
+    # @return [Lumberjack::EntryFormatter] the entry formatter for ActiveRecord models
+    def active_record_entry_formatter
+      Lumberjack::EntryFormatter.build do
+        attributes do
+          add_class("ActiveRecord::Base", :id)
+        end
+      end
     end
 
     # Redirect standard streams ($stdout, $stderr) to logger instances.
