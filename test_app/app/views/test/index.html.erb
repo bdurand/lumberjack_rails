@@ -1,1 +1,9 @@
-Hello, World
+<h3>
+  <%= pluralize(TestModel.count, "record") %>
+</h3>
+
+<ul>
+  <%= TestModel.all.each do |test_model| %>
+    <li><%= test_model.name %></li>
+  <% end %>
+</ul>

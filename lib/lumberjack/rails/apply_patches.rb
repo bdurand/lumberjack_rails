@@ -24,6 +24,8 @@ ActiveSupport::BroadcastLogger.prepend(Lumberjack::Rails::BroadcastLoggerExtensi
 
 ActiveSupport.on_load(:active_job) do
   ActiveJob::Base.prepend(Lumberjack::Rails::ActiveJobExtension)
+  ActiveJob::LogSubscriber.prepend(Lumberjack::Rails::LogSubscriberExtension)
+  ActiveJob::LogSubscriber.logger = -> { ActiveJob::Base.logger }
 end
 
 ActiveSupport.on_load(:action_cable) do
@@ -32,6 +34,8 @@ end
 
 ActiveSupport.on_load(:action_mailer) do
   ActionMailer::Base.prepend(Lumberjack::Rails::ActionMailerExtension)
+  ActionMailer::LogSubscriber.prepend(Lumberjack::Rails::LogSubscriberExtension)
+  ActionMailer::LogSubscriber.logger = -> { ActionMailer::Base.logger }
 end
 
 ActiveSupport.on_load(:action_mailbox) do
@@ -40,4 +44,24 @@ end
 
 ActiveSupport.on_load(:action_controller) do
   ActionController::Base.prepend(Lumberjack::Rails::ActionControllerExtension)
+
+  ActionController::LogSubscriber.prepend(Lumberjack::Rails::LogSubscriberExtension)
+  ActionController::LogSubscriber.logger = -> { ActionController::Base.logger }
+
+  ActionDispatch::LogSubscriber.prepend(Lumberjack::Rails::LogSubscriberExtension)
+end
+
+ActiveSupport.on_load(:action_view) do
+  ActionView::LogSubscriber.prepend(Lumberjack::Rails::LogSubscriberExtension)
+  ActionView::LogSubscriber.logger = -> { ActionView::Base.logger }
+end
+
+ActiveSupport.on_load(:active_record) do
+  ActiveRecord::LogSubscriber.prepend(Lumberjack::Rails::LogSubscriberExtension)
+  ActiveRecord::LogSubscriber.logger = -> { ActiveRecord::Base.logger }
+end
+
+ActiveSupport.on_load(:active_storage_record) do
+  ActiveStorage::LogSubscriber.prepend(Lumberjack::Rails::LogSubscriberExtension)
+  ActiveStorage::LogSubscriber.logger = -> { ActiveStorage.logger }
 end

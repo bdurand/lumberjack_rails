@@ -146,7 +146,29 @@ In addition, a Rack middleware will be added to ensure a context is set on Rails
 
 This allows you to change the log level or tag attributes on `Rails.logger` within your application code in these frameworks without affecting the global logger or the settings in any concurrent requests.
 
-### Formatter
+### Log Subscribers
+
+Rails comes with several built-in log subscribers that are extended with Lumberjack. These include:
+
+- `ActiveRecord::LogSubscriber`
+- `ActionController::LogSubscriber`
+- `ActionDispatch::LogSubscriber`
+- `ActionView::LogSubscriber`
+- `ActiveJob::LogSubscriber`
+- `ActionMailer::LogSubscriber`
+- `ActiveStorage::LogSubscriber`
+
+These log subscribers will all use fork loggers. This these forked loggers are isolated from the main logger allowing you to change the log level and add attributes that is isolated to that log subscriber.
+
+```ruby
+# Set up log subscriber in an initializer
+ActiveSupport.on_load(:action_controller) do
+  ActionController::LogSubscriber.logger.level = :info # Override the log level
+  ActionController::LogSubscriber.logger.tag!(user_id: Current.user_id) # Tag all log entries with the user ID
+end
+```
+
+### Log Formatter
 
 ActiveRecord models logged in attributes will automatically be logged with a formatter that will only log the class name and id for the model. You can add additional formatters for `ApplicationRecord` or for your models to override this behavior.
 

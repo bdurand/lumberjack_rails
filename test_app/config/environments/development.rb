@@ -2,8 +2,6 @@ require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
-  config.lumberjack.enabled = true
-  config.lumberjack.log_rake_tasks = true
 
   # Make code changes take effect immediately without server restart.
   config.enable_reloading = true
@@ -85,8 +83,8 @@ Rails.application.configure do
   end
 
   config.lumberjack.device = :json
-  config.lumberjack.output = $stdout
+  config.lumberjack.output = "log/development.log"
   config.lumberjack.pretty = true
 
-  config.log_level = :info
+  config.log_level = :debug
 end
