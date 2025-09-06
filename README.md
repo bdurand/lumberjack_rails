@@ -130,6 +130,14 @@ config.formatter = Lumberjack.build_formatter do
 end
 ```
 
+### Broadcast Logger
+
+Rails provides a built-in mechanism for broadcasting log messages to multiple destinations. `Rails.logger` is actually an `ActiveSupport::BroadcastLogger` object wrapping one or more underlying loggers. When you call a method on `Rails.logger`, it will call that method on all underlying loggers. This can create some problems for methods that take a block since that block could get called once for each logger being broadcast to. Only one Lumberjack logger should be added `Rails.logger`. If more than one is added, method like `tag` or `context` that take a block will only be called on one of the loggers.
+
+If you want to send your logs to multiple devices with Lumberjack, you can use the Multi device instead.
+
+The one place that Rails uses multiple loggers out of the box is in development mode where logs are also sent to the console in addition to the log file. This functionality is supported.
+
 ### Lumberjack Contexts
 
 Contexts are used in Lumberjack to provide isolation for changes to your logger. Within a context block, you can change the log level, progname, or attributes and they will only apply within that block execution.

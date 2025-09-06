@@ -84,7 +84,15 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
 
       # Create logger options
       logger_options = config.lumberjack.to_h.except(
-        :enabled, :device, :level, :progname, :attributes, :shift_age, :shift_size, :log_rake_tasks, :middleware, :request_attributes
+        :enabled,
+        :device, :level,
+        :progname,
+        :attributes,
+        :shift_age,
+        :shift_size,
+        :log_rake_tasks,
+        :middleware,
+        :request_attributes
       )
       logger_options.merge!(
         level: level,
@@ -141,6 +149,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
   config.lumberjack.log_rake_tasks = false
   config.lumberjack.template = "[:time :severity :progname (:pid)] :tags :message -- :attributes"
   config.lumberjack.pad_severity = true
+  config.lumberjack.log_to_stdout = false
 
   initializer "lumberjack.configure_logger", before: :initialize_logger do |app|
     logger = Lumberjack::Rails::Railtie.lumberjack_logger(app.config, app.paths["log"]&.first)
