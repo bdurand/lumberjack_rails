@@ -12,6 +12,8 @@ module Lumberjack
   # enhancing Rails' logging capabilities while maintaining compatibility with
   # existing Rails logging patterns.
   module Rails
+    VERSION = ::File.read(::File.join(__dir__, "..", "..", "VERSION")).strip.freeze
+
     class << self
       # Safely wrap Rails.logger with a Lumberjack context.
       #
