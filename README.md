@@ -96,7 +96,7 @@ config.lumberjack.formatter = Lumberjack.build_formatter do
 end
 
 # Use a custom template that adds the request id on all log entry lines.
-config.lumberjack.template = "[:time :severity :progname :request_id] :tags :message -- :attributes"
+config.lumberjack.template = "{{time}} {{severity}} {{progname}} {{request_id}}] {{tags}} {{message}} -- {{attributes}}"
 config.lumberjack.additional_lines = "> :request_id :message"
 
 # Format log attributes as "[name=value]" (default is [name:value])
