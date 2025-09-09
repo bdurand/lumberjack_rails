@@ -110,7 +110,7 @@ config.lumberjack.log_rake_tasks = true
 ```
 
 > [!TIP]
-> If you are using a logging pipeline in production that supports [JSONL](https://jsonlines.org/) logs, then check out the [lumberjack_json_device](https://github.com/bdurand/lumberjack_json_device). The gem provides a mechanism for defining the JSON schema for your logs and outputing them to JSONL.
+> If you are using a logging pipeline in production that supports [JSONL](https://jsonlines.org/) logs, then check out the [lumberjack_json_device](https://github.com/bdurand/lumberjack_json_device). The gem provides a mechanism for defining the JSON schema for your logs and outputting them to JSONL.
 
 ### TaggedLogger
 
