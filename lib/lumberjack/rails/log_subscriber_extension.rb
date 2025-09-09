@@ -8,7 +8,7 @@ module Lumberjack::Rails
   # Forked loggers provide isolation, allowing different log levels and attributes
   # to be set for different log subscribers without affecting the main logger.
   #
-  # When a log subscriber's logger is accessed, this extension checks if the 
+  # When a log subscriber's logger is accessed, this extension checks if the
   # parent logger supports forking. If it does, a ForkedLogger is created and
   # cached for subsequent use. This ensures each log subscriber has its own
   # isolated logger context.
