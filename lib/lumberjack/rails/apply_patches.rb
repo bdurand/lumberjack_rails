@@ -1,5 +1,20 @@
 # frozen_string_literal: true
 
+# Integration patches for Lumberjack Rails support.
+#
+# This file applies various patches and extensions to integrate Lumberjack
+# with Rails framework components. It performs the following key integrations:
+#
+# 1. Removes deprecated Lumberjack::Logger methods that conflict with ActiveSupport
+# 2. Adds tagged logging support to Lumberjack formatters and loggers
+# 3. Extends ActiveSupport::BroadcastLogger with Lumberjack compatibility
+# 4. Integrates with Rails framework components (ActiveJob, ActionCable, etc.)
+# 5. Sets up log subscribers to use forked Lumberjack loggers
+#
+# These patches ensure seamless integration between Lumberjack's logging
+# capabilities and Rails' existing logging infrastructure while maintaining
+# backward compatibility with existing Rails logging patterns.
+
 # Remove deprecated methods on Lumberjack::Logger that are implemented by ActiveSupport
 Lumberjack::Logger.remove_method(:tagged) if Lumberjack::Logger.instance_methods.include?(:tagged)
 Lumberjack::Logger.remove_method(:log_at) if Lumberjack::Logger.instance_methods.include?(:log_at)

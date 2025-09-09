@@ -57,7 +57,7 @@ Whether to install Rack middleware that adds a Lumberjack context to each reques
 A proc or hash to add tags to log entries for each Rack request. If this is a proc, it will be called with the request object. If this is a hash, it will be used as static tags for all requests.
 
 > [!TIP]
-> You can use this feature to add both static
+> You can use this feature to add both static attributes (using a hash) and dynamic attributes (using a proc) to all log entries within a request context.
 
 #### Additional Options
 
@@ -109,7 +109,7 @@ config.lumberjack.request_attributes = { request_id: -> (request) { request.requ
 config.lumberjack.log_rake_tasks = true
 ```
 
-> ![TIP]
+> [!TIP]
 > If you are using a logging pipeline in production that supports [JSONL](https://jsonlines.org/) logs, then check out the [lumberjack_json_device](https://github.com/bdurand/lumberjack_json_device). The gem provides a mechanism for defining the JSON schema for your logs and outputing them to JSONL.
 
 ### TaggedLogger
@@ -120,10 +120,10 @@ Lumberjack supports the `tagged` method and will put the tags into the `tags` at
 
 ```ruby
 # The :tags placeholder will be replaced with the tags attribute. This is the default template.
-config.lumberjack.template = "[:timestamp :severity :progname (:pid)] :tags :message -- :attributes"
+config.lumberjack.template = "[:time :severity :progname (:pid)] :tags :message -- :attributes"
 
 # Add the :tags formatter. If you don't do this, then the tags will be formatted as an inspected array.
-config.formatter = Lumberjack.build_formatter do
+config.lumberjack.formatter = Lumberjack.build_formatter do
   attributes do
     add_attribute(:tags, :tags)
   end
