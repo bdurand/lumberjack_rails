@@ -44,7 +44,7 @@
 #
 # Example usage in config/application.rb:
 #   config.log_level = :info
-#   config.attributes = {app: "my_app", host: Lumberjack::Utils.hostname}
+#   config.lumberjack.attributes = {app: "my_app", host: Lumberjack::Utils.hostname}
 #   config.lumberjack.device = STDOUT  # optional override
 class Lumberjack::Rails::Railtie < ::Rails::Railtie
   class << self
