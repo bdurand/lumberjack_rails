@@ -84,15 +84,14 @@ config.lumberjack.attributes = {
 config.lumberjack.device = STDOUT
 
 # Build the log entry formatter
-config.lumberjack.formatter = Lumberjack.build_formatter do
-  add(ActiveRecord::Base, :id)
-  attributes do
-    # Format the :tags attribute as tags (e.g. [tag1] [tag2])
-    add_attribute("tags", :tags)
+config.lumberjack.formatter = Lumberjack.build_formatter do |formatter|
+  formatter.add(ActiveRecord::Base, :id)
 
-    add_attribute("cost", :round, 2)
-    add_class("User") { |user| {id: user.id, username: user.username} }
-  end
+  # Format the :tags attribute as tags (e.g. [tag1] [tag2])
+  formatter.add_attribute("tags", :tags)
+
+  formatter.add_attribute("cost", :round, 2)
+  formatter.add_attribute_class("User") { |user| {id: user.id, username: user.username} }
 end
 
 # Use a custom template that adds the request id on all log entry lines.
@@ -123,10 +122,8 @@ Lumberjack supports the `tagged` method and will put the tags into the `tags` at
 config.lumberjack.template = "[:time :severity :progname (:pid)] :tags :message -- :attributes"
 
 # Add the :tags formatter. If you don't do this, then the tags will be formatted as an inspected array.
-config.lumberjack.formatter = Lumberjack.build_formatter do
-  attributes do
-    add_attribute(:tags, :tags)
-  end
+config.lumberjack.formatter = Lumberjack.build_formatter do |formatter|
+  formatter.add_attribute(:tags, :tags)
 end
 ```
 

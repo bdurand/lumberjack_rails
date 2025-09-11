@@ -113,10 +113,8 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
     #
     # @return [Lumberjack::EntryFormatter] the entry formatter for ActiveRecord models
     def active_record_entry_formatter
-      Lumberjack::EntryFormatter.build do
-        attributes do
-          add_class("ActiveRecord::Base", :id)
-        end
+      Lumberjack::EntryFormatter.build do |formatter|
+        formatter.add_attribute_class("ActiveRecord::Base", :id)
       end
     end
 
