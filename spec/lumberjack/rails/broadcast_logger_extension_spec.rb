@@ -185,7 +185,7 @@ RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
     end
 
     it "does not yield multiple when calling set_progname with a block and logs warnings" do
-      silence_deprecations do
+      Lumberjack::Utils.silence_deprecations do
         n = 0
         broadcast_logger.set_progname("MyApp") do
           n += 1
@@ -207,7 +207,7 @@ RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
     end
 
     it "does not yield multiple when calling untagged with a block and logs warnings" do
-      silence_deprecations do
+      Lumberjack::Utils.with_deprecations_mode("silent") do
         n = 0
         broadcast_logger.untagged do
           n += 1

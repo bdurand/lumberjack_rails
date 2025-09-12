@@ -85,6 +85,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       # Create logger options
       logger_options = config.lumberjack.to_h.except(
         :enabled,
+        :raise_logger_errors,
         :device, :level,
         :progname,
         :attributes,
@@ -145,11 +146,12 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
   config.lumberjack.enabled = true
   config.lumberjack.middleware = true
   config.lumberjack.log_rake_tasks = false
-  config.lumberjack.template = "[:time :severity :progname (:pid)] :tags :message -- :attributes"
-  config.lumberjack.pad_severity = true
-  config.lumberjack.log_to_stdout = false
+  config.lumberjack.template = "[{{time}} {{severity(padded)}} {{progname}} ({{pid}})] {{tags}} {{message}} -- {{attributes}}"
+  config.lumberjack.raise_logger_errors = !(Rails.env.development? || Rails.env.test?)
 
   initializer "lumberjack.configure_logger", before: :initialize_logger do |app|
+    Lumberjack.raise_logger_errors = app.config.lumberjack.raise_logger_errors
+
     logger = Lumberjack::Rails::Railtie.lumberjack_logger(app.config, app.paths["log"]&.first)
     app.config.logger = logger if logger
   end
