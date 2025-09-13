@@ -207,7 +207,7 @@ RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
     end
 
     it "does not yield multiple when calling untagged with a block and logs warnings" do
-      Lumberjack::Utils.with_deprecations_mode("silent") do
+      Lumberjack::Utils.with_deprecations_mode(:silent) do
         n = 0
         broadcast_logger.untagged do
           n += 1
