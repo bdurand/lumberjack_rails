@@ -111,6 +111,15 @@ config.lumberjack.log_rake_tasks = true
 > [!TIP]
 > If you are using a logging pipeline in production that supports [JSONL](https://jsonlines.org/) logs, then check out the [lumberjack_json_device](https://github.com/bdurand/lumberjack_json_device). The gem provides a mechanism for defining the JSON schema for your logs and outputting them to JSONL.
 
+> [!TIP]
+> If you want more easily readable log output in development or test environments, you can set the `config.lumberjack.template` to `:test`. If you have attributes that are logged on every entry but don't want them cluttering up your development logs, you can set `config.lumberjack.exclude_attributes` to the attribute names to exclude.
+
+```ruby
+config.lumberjack.template = :test
+config.lumberjack.exclude_progname = true
+config.lumberjack.exclude_attributes = [:host, :request_id]
+```
+
 ### TaggedLogger
 
 Rails has its own solution for logging metadata in the `tagged` method added to logger which can add an array of tags to log entries.
@@ -176,6 +185,12 @@ end
 ### Log Formatter
 
 ActiveRecord models logged in attributes will automatically be logged with a formatter that will only log the class name and id for the model. You can add additional formatters for `ApplicationRecord` or for your models to override this behavior.
+
+### Testing
+
+Lumberjack comes with built-in support for testing that critical log messages are generated. See the [lumberjack documentation](https://github.com/bdurand/lumberjack#testing-utilities) for more information.
+
+If you are using RSpec, then you can use the [lumberjack_rails_rspec](https://github.com/bdurand/lumberjack_rails_rspec) gem for to add RSpec matchers for testing log messages to your test suite.
 
 ## Installation
 
