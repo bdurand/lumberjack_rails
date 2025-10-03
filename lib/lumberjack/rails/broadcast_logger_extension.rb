@@ -27,8 +27,8 @@ module Lumberjack
       # @yield optional block that returns the message
       # @return [void]
       def debug(message_or_progname_or_attributes = nil, progname_or_attributes = nil, &block)
-        dispatch do |logger|
-          call_with_attributes_arg(logger, :debug, message_or_progname_or_attributes, progname_or_attributes, &block)
+        dispatch_to_each(block) do |logger, one_time_block|
+          call_with_attributes_arg(logger, :debug, message_or_progname_or_attributes, progname_or_attributes, &one_time_block)
         end
       end
 
@@ -39,8 +39,8 @@ module Lumberjack
       # @yield optional block that returns the message
       # @return [void]
       def info(message_or_progname_or_attributes = nil, progname_or_attributes = nil, &block)
-        dispatch do |logger|
-          call_with_attributes_arg(logger, :info, message_or_progname_or_attributes, progname_or_attributes, &block)
+        dispatch_to_each(block) do |logger, one_time_block|
+          call_with_attributes_arg(logger, :info, message_or_progname_or_attributes, progname_or_attributes, &one_time_block)
         end
       end
 
@@ -51,8 +51,8 @@ module Lumberjack
       # @yield optional block that returns the message
       # @return [void]
       def warn(message_or_progname_or_attributes = nil, progname_or_attributes = nil, &block)
-        dispatch do |logger|
-          call_with_attributes_arg(logger, :warn, message_or_progname_or_attributes, progname_or_attributes, &block)
+        dispatch_to_each(block) do |logger, one_time_block|
+          call_with_attributes_arg(logger, :warn, message_or_progname_or_attributes, progname_or_attributes, &one_time_block)
         end
       end
 
@@ -63,8 +63,8 @@ module Lumberjack
       # @yield optional block that returns the message
       # @return [void]
       def error(message_or_progname_or_attributes = nil, progname_or_attributes = nil, &block)
-        dispatch do |logger|
-          call_with_attributes_arg(logger, :error, message_or_progname_or_attributes, progname_or_attributes, &block)
+        dispatch_to_each(block) do |logger, one_time_block|
+          call_with_attributes_arg(logger, :error, message_or_progname_or_attributes, progname_or_attributes, &one_time_block)
         end
       end
 
@@ -75,8 +75,8 @@ module Lumberjack
       # @yield optional block that returns the message
       # @return [void]
       def fatal(message_or_progname_or_attributes = nil, progname_or_attributes = nil, &block)
-        dispatch do |logger|
-          call_with_attributes_arg(logger, :fatal, message_or_progname_or_attributes, progname_or_attributes, &block)
+        dispatch_to_each(block) do |logger, one_time_block|
+          call_with_attributes_arg(logger, :fatal, message_or_progname_or_attributes, progname_or_attributes, &one_time_block)
         end
       end
 
@@ -87,8 +87,8 @@ module Lumberjack
       # @yield optional block that returns the message
       # @return [void]
       def unknown(message_or_progname_or_attributes = nil, progname_or_attributes = nil, &block)
-        dispatch do |logger|
-          call_with_attributes_arg(logger, :unknown, message_or_progname_or_attributes, progname_or_attributes, &block)
+        dispatch_to_each(block) do |logger, one_time_block|
+          call_with_attributes_arg(logger, :unknown, message_or_progname_or_attributes, progname_or_attributes, &one_time_block)
         end
       end
 
@@ -101,8 +101,8 @@ module Lumberjack
       # @return [void]
       def add(severity, message_or_progname_or_attributes = nil, progname_or_attributes = nil, &block)
         severity = Logger::Severity.coerce(severity)
-        dispatch do |logger|
-          call_add_with_attributes_arg(logger, severity, message_or_progname_or_attributes, progname_or_attributes, &block)
+        dispatch_to_each(block) do |logger, one_time_block|
+          call_add_with_attributes_arg(logger, severity, message_or_progname_or_attributes, progname_or_attributes, &one_time_block)
         end
       end
 
@@ -244,6 +244,9 @@ module Lumberjack
       # methods like `tag` that are expected to be called with a block that
       # has business logic inside of it.
       #
+      # This method is used for methods that modify the state of the logger. Since the block
+      # is only called once, other loggers will not have the internal state modified as expected.
+      #
       # @param name [Symbol] the method name to dispatch
       # @yield optional block to execute
       # @return [Object] the result of the method execution
@@ -261,6 +264,30 @@ module Lumberjack
         loggers.first.warn("#{message} It was called on this logger.")
         loggers[1..].each { |logger| logger.warn("#{message} It was not called on this logger.") }
         loggers.first.send(name, ...)
+      end
+
+      # Dispatch to each logger and the block if any. The block will only be called once.
+      #
+      # @param block [Proc] Block that will be called on the wrapped method.
+      # @yield block to execute for each logger
+      # @return [Object] the result of the first logger's block execution
+      # @yieldparam logger [Logger] the current logger
+      # @yieldparam one_time_block [Proc, nil] the block to execute, or nil if no block was given.
+      def dispatch_to_each(block)
+        if block
+          called = false
+          result = nil
+          one_time_block = lambda do
+            if called
+              result
+            else
+              called = true
+              result = block.call
+            end
+          end
+        end
+
+        broadcasts.map { |logger| yield(logger, one_time_block) }.first
       end
     end
   end

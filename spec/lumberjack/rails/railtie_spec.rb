@@ -53,7 +53,7 @@ RSpec.describe "Railtie" do
 
         begin
           logger = Lumberjack::Rails::Railtie.lumberjack_logger(config, log_file_path)
-          expect(logger.device).to be_a(Lumberjack::Device::LoggerFile)
+          expect(logger.device).to be_a(Lumberjack::Device::LogFile)
           expect(logger.device.path).to eq(log_file_path)
         ensure
           FileUtils.rm_f(log_file_path)

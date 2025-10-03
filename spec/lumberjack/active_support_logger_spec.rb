@@ -10,9 +10,9 @@ RSpec.describe "ActiveSupport::Logger compatibility" do
       expect(ActiveSupport::Logger.logger_outputs_to?(logger, StringIO.new)).to be false
     end
 
-    it "detects the underlying stream from a LoggerFile device" do
+    it "detects the underlying stream from a LogFile device" do
       stream = StringIO.new
-      device = Lumberjack::Device::LoggerFile.new(stream)
+      device = Lumberjack::Device::LogFile.new(stream)
       logger = Lumberjack::Logger.new(device)
       expect(ActiveSupport::Logger.logger_outputs_to?(logger, stream)).to be true
       expect(ActiveSupport::Logger.logger_outputs_to?(logger, StringIO.new)).to be false
