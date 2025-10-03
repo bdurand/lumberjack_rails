@@ -93,7 +93,8 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
         :shift_size,
         :log_rake_tasks,
         :middleware,
-        :request_attributes
+        :request_attribute,
+        :silence_rack_request_started
       )
       logger_options.merge!(
         level: level,
