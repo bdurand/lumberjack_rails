@@ -37,9 +37,6 @@ Lumberjack::ForkedLogger.include(Lumberjack::Rails::TaggedForkedLogger)
 
 ActiveSupport::BroadcastLogger.prepend(Lumberjack::Rails::BroadcastLoggerExtension)
 
-# Add hook to allow disabling of "Started ..." log lines in Rack::Logger
-::Rails::Rack::Logger.prepend(Lumberjack::Rails::RackLoggerExtension)
-
 ActiveSupport.on_load(:active_job) do
   ActiveJob::Base.prepend(Lumberjack::Rails::ActiveJobExtension)
   ActiveJob::LogSubscriber.prepend(Lumberjack::Rails::LogSubscriberExtension)
@@ -61,6 +58,9 @@ ActiveSupport.on_load(:action_mailbox) do
 end
 
 ActiveSupport.on_load(:action_controller) do
+  # Add hook to allow disabling of "Started ..." log lines in Rack::Logger
+  ::Rails::Rack::Logger.prepend(Lumberjack::Rails::RackLoggerExtension) if defined?(::Rails::Rack::Logger)
+
   ActionController::Base.prepend(Lumberjack::Rails::ActionControllerExtension)
 
   ActionController::LogSubscriber.prepend(Lumberjack::Rails::LogSubscriberExtension)
