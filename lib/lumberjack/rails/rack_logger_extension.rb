@@ -5,7 +5,7 @@ module Lumberjack::Rails
     private
 
     def started_request_message(request)
-      return if Lumberjack::Rails.silence_rack_request_started
+      return if Lumberjack::Rails.silence_rack_request_started?
 
       super
     end

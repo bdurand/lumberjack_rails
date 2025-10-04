@@ -121,12 +121,18 @@ config.lumberjack.log_rake_tasks = true
 > If you are using a logging pipeline in production that supports [JSONL](https://jsonlines.org/) logs, then check out the [lumberjack_json_device](https://github.com/bdurand/lumberjack_json_device). The gem provides a mechanism for defining the JSON schema for your logs and outputting them to JSONL.
 
 > [!TIP]
-> If you want more easily readable log output in development or test environments, you can set the `config.lumberjack.template` to `:test`. If you have attributes that are logged on every entry but don't want them cluttering up your development logs, you can set `config.lumberjack.exclude_attributes` to the attribute names to exclude.
+> If you want more easily readable log output in development or test environments, you can set the `config.lumberjack.template` to `:local`.
+>
+> If you have attributes that are logged on every entry but don't want them cluttering up your development logs, you can set `config.lumberjack.exclude_attributes` to the attribute names to exclude.
+>
+> You can also colorize the logs by setting `config.lumberjack.colorize` to `true` and set the format of the severity with `config.lumberjack.severity_format`.
 
 ```ruby
-config.lumberjack.template = :test
+config.lumberjack.template = :local
 config.lumberjack.exclude_progname = true
 config.lumberjack.exclude_attributes = [:host, :request_id]
+config.lumberjack.colorize = true
+config.lumberjack.severity_format = :emoji
 ```
 
 ### TaggedLogger

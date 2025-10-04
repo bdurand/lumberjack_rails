@@ -152,6 +152,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
 
   initializer "lumberjack.configure_logger", before: :initialize_logger do |app|
     Lumberjack.raise_logger_errors = app.config.lumberjack.raise_logger_errors
+    Lumberjack::Rails.silence_rack_request_started = app.config.lumberjack.silence_rack_request_started
 
     logger = Lumberjack::Rails::Railtie.lumberjack_logger(app.config, app.paths["log"]&.first)
     app.config.logger = logger if logger

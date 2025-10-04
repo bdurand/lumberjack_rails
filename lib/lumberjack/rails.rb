@@ -14,6 +14,8 @@ module Lumberjack
   module Rails
     VERSION = ::File.read(::File.join(__dir__, "..", "..", "VERSION")).strip.freeze
 
+    @silence_rack_request_started = false
+
     class << self
       # Safely wrap Rails.logger with a Lumberjack context.
       #
@@ -39,8 +41,18 @@ module Lumberjack
       # will be suppressed. This can help reduce log noise in applications where
       # these lines are not needed.
       #
+      # @param value [Boolean] whether to silence "Started ..." log lines (default: false)
+      # @return [void]
+      def silence_rack_request_started=(value)
+        @silence_rack_request_started = !!value
+      end
+
+      # Returns true if the "Started ..." log lines in Rack::Logger are silenced.
+      #
       # @return [Boolean] whether to silence "Started ..." log lines (default: false)
-      attr_accessor :silence_rack_request_started
+      def silence_rack_request_started?
+        @silence_rack_request_started
+      end
 
       private
 
