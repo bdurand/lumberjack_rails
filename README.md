@@ -69,6 +69,11 @@ All other options in the `config.lumberjack` namespace are passed as options to 
 
 So, if you want to set a specific log format, you could set `config.lumberjack.template` to a [custom template](https://github.com/bdurand/lumberjack/blob/main/lib/lumberjack/template.rb) string. You can build your logger formatter with `config.lumberjack.formatter`.
 
+> [!TIP]
+> For more readable logs in development or test environments, you can set `config.lumberjack.template` to `:local` to use the built-in template intended for human readability.
+>
+> If you have attributes that are logged on every entry but don't want them cluttering up your development logs (i.e. `host`, `version`, etc.), you can set `config.lumberjack.exclude_attributes` to the attribute names to exclude.
+
 #### Example Configuration
 
 Here's an example of how you might configure Lumberjack in your `config/application.rb`:
