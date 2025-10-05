@@ -205,7 +205,26 @@ ActiveRecord models logged in attributes will automatically be logged with a for
 
 Lumberjack comes with built-in support for testing that critical log messages are generated. See the [lumberjack documentation](https://github.com/bdurand/lumberjack#testing-utilities) for more information.
 
-If you are using RSpec, then you can use the [lumberjack_rails_rspec](https://github.com/bdurand/lumberjack_rails_rspec) gem for to add RSpec matchers for testing log messages to your test suite.
+If you are using RSpec, then you can use the [lumberjack_rails_rspec](https://github.com/bdurand/lumberjack_capture_device) gem for to add RSpec matchers for testing log messages to your test suite.
+
+```ruby
+# In spec/rails_helper.rb
+
+require "lumberjack/capture_device/rspec"
+
+RSpec.configure do |config|
+  config.around do |example|
+    capture_logger_around_example(Rails.logger, example)
+  end
+end
+
+RSpec.describe MyModel do
+  it "logs a message when doing something" do
+    MyModel.do_something_important
+    expect(Rails.logger).to include_log_entry(:info, /did something important/)
+  end
+end
+```
 
 ## Installation
 
