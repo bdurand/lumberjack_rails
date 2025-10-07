@@ -74,6 +74,13 @@ So, if you want to set a specific log format, you could set `config.lumberjack.t
 >
 > If you have attributes that are logged on every entry but don't want them cluttering up your development logs (i.e. `host`, `version`, etc.), you can set `config.lumberjack.exclude_attributes` to the attribute names to exclude.
 
+You can include `Lumberjack::Rails.active_record_entry_formatter` in your logger formatter to format ActiveRecord models in log attributes with just the model name and id.
+
+```ruby
+config.lumberjack.formatter = Lumberjack.build_formatter do |formatter|
+  formatter.include(Lumberjack::Rails.active_record_entry_formatter)
+end
+
 #### Example Configuration
 
 Here's an example of how you might configure Lumberjack in your `config/application.rb`:

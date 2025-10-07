@@ -55,6 +55,17 @@ module Lumberjack
         @silence_rack_request_started
       end
 
+      # EntryFormatter that adds a formatter for ActiveRecord models that outputs
+      # only the type and id.
+      #
+      # @return [Lumberjack::EntryFormatter] the configured entry formatter
+      def active_record_entry_formatter
+        Lumberjack::EntryFormatter.build do |formatter|
+          formatter.add("ActiveRecord::Base") { |record| "#{record.class.name}.#{record.id || "new_record"}" }
+          formatter.add_attribute_class("ActiveRecord::Base", :id)
+        end
+      end
+
       private
 
       # Wrap a block with a logger context if the logger supports it.
