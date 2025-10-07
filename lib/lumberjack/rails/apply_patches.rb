@@ -63,6 +63,7 @@ ActiveSupport.on_load(:action_controller) do
 
   ActionController::Base.prepend(Lumberjack::Rails::ActionControllerExtension)
 
+  ActionController::LogSubscriber.prepend(Lumberjack::Rails::ActionControllerLogSubscriberExtension)
   ActionController::LogSubscriber.prepend(Lumberjack::Rails::LogSubscriberExtension)
   ActionController::LogSubscriber.logger = -> { ActionController::Base.logger }
 

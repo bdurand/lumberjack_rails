@@ -190,11 +190,37 @@ Rails comes with several built-in log subscribers that are extended with Lumberj
 These log subscribers will all use fork loggers. This these forked loggers are isolated from the main logger allowing you to change the log level and add attributes that is isolated to that log subscriber.
 
 ```ruby
-# Set up log subscriber in an initializer
+# Set up log subscribers in an initializer
+
 ActiveSupport.on_load(:action_controller) do
-  ActionController::LogSubscriber.logger.level = :info # Override the log level
   ActionController::LogSubscriber.logger.tag!(user_id: Current.user_id) # Tag all log entries with the user ID
 end
+
+ActiveSupport.on_load(:action_view) do
+  unless Rails.env.local?
+    ActionView::LogSubscriber.logger.level = :warn # Silence view rendering logs in non-local environments
+  end
+end
+```
+
+You can also silence individual log subscriber events if you don't want to see them in your logs.
+
+```ruby
+ActiveSupport.on_load(:action_controller) do
+  ActionController::LogSubscriber.silence_event!!(:start_processing) # Silence the "Started ..." log lines
+end
+```
+
+You can also silence the logs that Rack adds when a request starts processing. This subscriber is implemented a bit differently by Rails, so there is a different method to silence it.
+
+```ruby
+Lumberjack::Rails.silence_rack_request_started = true
+```
+
+You can also silence the Rack logger in your application's configuration.
+
+```rubyruby
+config.lumberjack.silence_rack_request_started = true
 ```
 
 ### Log Formatter

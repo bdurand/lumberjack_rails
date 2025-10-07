@@ -15,6 +15,7 @@ module Lumberjack
     VERSION = ::File.read(::File.join(__dir__, "..", "..", "VERSION")).strip.freeze
 
     @silence_rack_request_started = false
+    @silenced_log_events = Set.new
 
     class << self
       # Safely wrap Rails.logger with a Lumberjack context.
@@ -74,6 +75,7 @@ end
 
 require_relative "rails/action_cable_extension"
 require_relative "rails/action_controller_extension"
+require_relative "rails/action_controller_log_subscriber_extension"
 require_relative "rails/action_mailbox_extension"
 require_relative "rails/action_mailer_extension"
 require_relative "rails/active_job_extension"

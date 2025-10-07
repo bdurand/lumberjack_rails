@@ -15,6 +15,11 @@ module Lumberjack::Rails
   module LogSubscriberExtension
     extend ActiveSupport::Concern
 
+    prepended do
+      @__logger ||= nil
+      @__silenced_events ||= nil
+    end
+
     class_methods do
       # Get the logger for this log subscriber class.
       #
@@ -28,8 +33,6 @@ module Lumberjack::Rails
         class_logger = super
         class_logger = class_logger.call if class_logger.is_a?(Proc)
 
-        @__logger ||= nil
-
         if class_logger.respond_to?(:fork)
           if !@__logger.is_a?(Lumberjack::ForkedLogger) || @__logger&.parent_logger != class_logger
             @__logger = class_logger.fork
@@ -40,6 +43,45 @@ module Lumberjack::Rails
 
         @__logger
       end
+
+      # Silence an individual event for this subscriber. The event name is the name of the public
+      # instance method to silence.
+      #
+      # @param event_name [String, Symbol] the name of the event to silence
+      # @return [void]
+      def silence_event!(event_name)
+        @__silenced_events ||= Set.new
+        @__silenced_events << event_name.to_s
+      end
+
+      # Unsilence an individual event for this subscriber.
+      #
+      # @param event_name [String, Symbol] the name of the event to unsilence
+      # @return [void]
+      def unsilence_event!(event_name)
+        @__silenced_events&.delete(event_name.to_s)
+      end
+
+      # Check if a specific event is silenced for this subscriber.
+      #
+      # @param event [String] the full event name of the event to check with the namespace
+      # @return [Boolean] true if the event is silenced, false otherwise
+      # @api private
+      def silenced_event?(event)
+        return false if @__silenced_events.nil?
+
+        i = event.index(".")
+        event_name = i ? event[0, i] : event
+        @__silenced_events.include?(event_name)
+      end
+    end
+
+    # Override the silenced? method to check if the event has been explicitly silenced.
+    #
+    # @param event [String] the event to check
+    # @return [Boolean] true if the event is silenced, false otherwise
+    def silenced?(event)
+      super || self.class.silenced_event?(event)
     end
 
     # Get the logger for this log subscriber instance.

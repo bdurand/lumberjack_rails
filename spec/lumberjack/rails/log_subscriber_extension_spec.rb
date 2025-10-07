@@ -5,6 +5,12 @@ require "spec_helper"
 RSpec.describe Lumberjack::Rails::LogSubscriberExtension do
   let(:log_subscriber) do
     Class.new(ActiveSupport::LogSubscriber) do
+      attr_writer :silenced
+
+      def silenced?(event)
+        !!@silenced
+      end
+
       prepend Lumberjack::Rails::LogSubscriberExtension
     end
   end
@@ -74,6 +80,24 @@ RSpec.describe Lumberjack::Rails::LogSubscriberExtension do
     end
   end
 
+  describe "#silenced?" do
+    let(:subscriber) { log_subscriber.new }
+
+    it "returns the default value" do
+      expect(subscriber.silenced?("test")).to be false
+      subscriber.silenced = true
+      expect(subscriber.silenced?("test")).to be true
+    end
+
+    it "can override the silenced state with Lumberjack::Rails configuration" do
+      log_subscriber.silence_event!(:silenced)
+      expect(subscriber.silenced?("silenced")).to be true
+      expect(subscriber.silenced?("test")).to be false
+      log_subscriber.unsilence_event!(:silenced)
+      expect(subscriber.silenced?("silenced")).to be false
+    end
+  end
+
   describe "ActiveJob::LogSubscriber" do
     require "active_job"
 
@@ -115,6 +139,11 @@ RSpec.describe Lumberjack::Rails::LogSubscriberExtension do
   describe "ActionController::LogSubscriber" do
     require "action_controller"
 
+    # Force framework to load
+    before :all do
+      ActionController::Base
+    end
+
     around do |example|
       save_logger = ActionController::Base.logger
       ActionController::Base.logger = Lumberjack::Logger.new(:test)
@@ -133,6 +162,11 @@ RSpec.describe Lumberjack::Rails::LogSubscriberExtension do
 
   describe "ActionDispatch::LogSubscriber" do
     require "action_dispatch"
+
+    # Force framework to load
+    before :all do
+      ActionController::Base
+    end
 
     around do |example|
       save_logger = Rails.logger

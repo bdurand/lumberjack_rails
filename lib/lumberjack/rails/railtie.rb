@@ -38,6 +38,10 @@
 #     it will be called with the request object. If a hash, it will be used
 #     as static tags for all requests.
 #
+#   config.lumberjack.silence_rack_request_started (default: false)
+#     Whether to silence the "Started ..." log lines in Rack::Logger. You may want to silence
+#     this entry if it is just creating noise in your production logs.
+#
 #   config.lumberjack.*
 #     All other options are sent as options to the Lumberjack logger
 #     constructor.
@@ -96,6 +100,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
         :request_attribute,
         :silence_rack_request_started
       )
+
       logger_options.merge!(
         level: level,
         formatter: config.lumberjack.formatter,
