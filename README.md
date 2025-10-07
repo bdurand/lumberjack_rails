@@ -223,6 +223,40 @@ You can also silence the Rack logger in your application's configuration.
 config.lumberjack.silence_rack_request_started = true
 ```
 
+#### Enhanced ActionController Logging
+
+The `ActionController::LogSubscriber` has been enhanced to allow you to specify additional attributes to be logged in the log entry when each request is finished processing. This log entry can be extremely useful as a canonical log entry for the request and Rails already supports adding some metadata onto the message. This extension allows you to add more metadata and add it as attributes for better structured logging.
+
+```ruby
+# Setup the additional attributes in an initializer.
+
+ActiveSupport.on_load(:action_controller) do
+  # Add the IP address from the request to the canonical log entry for the request.
+  # The notification event is passed to the block.
+  ActionController::LogSubscriber.add_process_log_attribute(:ip_address) { |event| event.payload[:request].remote_ip }
+
+  # You can also add multiple attributes with with a block that returns a hash.
+  ActionController::LogSubscriber.process_log_attributes do |event|
+    request = event.payload[:request]
+
+    # Get the HTTP status code from the event payload.
+    status = event.payload[:status]
+    if status.nil? && (exception_class_name = event.payload[:exception]&.first)
+      status = ActionDispatch::ExceptionWrapper.status_code_for_exception(exception_class_name)
+    end
+
+    {
+      http: {
+        status: status,
+        method: request.method,
+        url: request.base_url + request.filtered_path,
+        useragent: request.user_agent,
+      }
+    }
+  end
+end
+```
+
 ### Log Formatter
 
 ActiveRecord models logged in attributes will automatically be logged with a formatter that will only log the class name and id for the model. You can add additional formatters for `ApplicationRecord` or for your models to override this behavior.
