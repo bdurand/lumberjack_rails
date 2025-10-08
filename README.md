@@ -80,6 +80,7 @@ You can include `Lumberjack::Rails.active_record_entry_formatter` in your logger
 config.lumberjack.formatter = Lumberjack.build_formatter do |formatter|
   formatter.include(Lumberjack::Rails.active_record_entry_formatter)
 end
+```
 
 #### Example Configuration
 
