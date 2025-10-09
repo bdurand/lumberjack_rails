@@ -34,9 +34,7 @@ RSpec.describe Lumberjack::Rails::RequestAttributesMiddleware do
   end
 
   it "does nothing if the attributes block returns nil" do
-    attributes_block = lambda do |request|
-      nil
-    end
+    attributes_block = lambda { |request| }
     middleware = Lumberjack::Rails::RequestAttributesMiddleware.new(app, attributes_block)
     _status, headers, _body = middleware.call(env)
 
