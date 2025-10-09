@@ -72,7 +72,7 @@ Rails.application.configure do
     thread: -> { Lumberjack::Utils.global_thread_id }
   }
 
-  config.lumberjack.request_attributes = lambda do |req|
+  config.lumberjack.request_attributes_proc = lambda do |req|
     {
       request_id: req.request_id
     }

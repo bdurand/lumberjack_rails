@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Lumberjack::Rails::Middleware do
+RSpec.describe Lumberjack::Rails::ContextMiddleware do
   let(:env) { {"REQUEST_METHOD" => "GET", "PATH_INFO" => "/test"} }
 
   let(:logger) { Lumberjack::Logger.new(:test) }
@@ -16,7 +16,7 @@ RSpec.describe Lumberjack::Rails::Middleware do
       [200, {"in-context" => Rails.logger.in_context?}, ["OK"]]
     end
 
-    middleware = Lumberjack::Rails::Middleware.new(app)
+    middleware = Lumberjack::Rails::ContextMiddleware.new(app)
     response = middleware.call(env)
 
     expect(response).to eq([200, {"in-context" => true}, ["OK"]])
@@ -27,7 +27,7 @@ RSpec.describe Lumberjack::Rails::Middleware do
       [200, {"in-context" => Lumberjack.in_context?}, ["OK"]]
     end
 
-    middleware = Lumberjack::Rails::Middleware.new(app)
+    middleware = Lumberjack::Rails::ContextMiddleware.new(app)
     response = middleware.call(env)
 
     expect(response).to eq([200, {"in-context" => true}, ["OK"]])

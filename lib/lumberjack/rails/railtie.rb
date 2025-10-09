@@ -33,10 +33,10 @@
 #   config.lumberjack.middleware (default: true)
 #     Whether to install Rack middleware that adds a Lumberjack context to each request.
 #
-#   config.lumberjack.request_attributes (default: nil)
-#     A proc or hash to add tags to log entries for each request. If a proc,
-#     it will be called with the request object. If a hash, it will be used
-#     as static tags for all requests.
+#   config.lumberjack.request_attributes_proc (default: nil)
+#     A proc to add tags to log entries for each request. The proc, will be
+#     called with the request object and must return a hash of attributes to
+#     include in each log entry for the request.
 #
 #   config.lumberjack.silence_rack_request_started (default: false)
 #     Whether to silence the "Started ..." log lines in Rack::Logger. You may want to silence
@@ -76,7 +76,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       # Determine the log level
       level = config.lumberjack.level || config.log_level || :debug
 
-      # Get default attributes
+      # Set default attributes
       attributes = config.lumberjack.attributes
       if config.log_tags
         attributes ||= {}
@@ -150,7 +150,6 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
 
   config.lumberjack = ActiveSupport::OrderedOptions.new
   config.lumberjack.enabled = true
-  config.lumberjack.middleware = true
   config.lumberjack.log_rake_tasks = false
   config.lumberjack.template = "[{{time}} {{severity(padded)}} {{progname}} ({{pid}})] {{tags}} {{message}} -- {{attributes}}"
   config.lumberjack.raise_logger_errors = !(Rails.env.development? || Rails.env.test?)
@@ -164,9 +163,13 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
   end
 
   initializer "lumberjack.insert_middleware" do |app|
-    next unless app.config.lumberjack&.enabled && config.lumberjack.middleware
+    next unless app.config.lumberjack&.enabled
 
     app.middleware.unshift(Lumberjack::Rails::Middleware)
+
+    if app.config.lumberjack.request_attributes_proc
+      app.middleware.use(Lumberjack::Rails::RequestAttributesMiddleware, app.config.lumberjack.request_attributes_proc)
+    end
   end
 
   config.after_initialize do

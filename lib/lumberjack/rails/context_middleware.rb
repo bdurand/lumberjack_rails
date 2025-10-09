@@ -3,7 +3,7 @@
 module Lumberjack
   module Rails
     # This Rack middleware provides a Lumberjack context for each request.
-    class Middleware
+    class ContextMiddleware
       # @param app [#call] The Rack application.
       def initialize(app)
         @app = app
