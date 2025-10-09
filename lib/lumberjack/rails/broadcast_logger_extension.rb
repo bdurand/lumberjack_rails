@@ -134,6 +134,14 @@ module Lumberjack
         dispatch_block_method(:context, &block)
       end
 
+      # Ensure a Lumberjack context is present for the duration of the block.
+      #
+      # @yield the block to execute within the ensured context
+      # @return [Object] the result of the block execution
+      def ensure_context(&block)
+        dispatch_block_method(:ensure_context, &block)
+      end
+
       # Append values to an existing attribute.
       #
       # @param attribute_name [String, Symbol] the name of the attribute

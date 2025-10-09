@@ -166,13 +166,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
   initializer "lumberjack.insert_middleware" do |app|
     next unless app.config.lumberjack&.enabled && config.lumberjack.middleware
 
-    attributes_block = app.config.lumberjack.request_attributes
-    if attributes_block.is_a?(Hash)
-      attributes_hash = attributes_block
-      attributes_block = lambda { |request| attributes_hash }
-    end
-
-    app.middleware.use(Lumberjack::Rails::Middleware, attributes_block)
+    app.middleware.unshift(Lumberjack::Rails::Middleware)
   end
 
   config.after_initialize do

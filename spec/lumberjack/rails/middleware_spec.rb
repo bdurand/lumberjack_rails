@@ -3,12 +3,6 @@
 require "spec_helper"
 
 RSpec.describe Lumberjack::Rails::Middleware do
-  let(:app) do
-    lambda do |env|
-      [200, logger.attributes, ["OK"]]
-    end
-  end
-
   let(:env) { {"REQUEST_METHOD" => "GET", "PATH_INFO" => "/test"} }
 
   let(:logger) { Lumberjack::Logger.new(:test) }
@@ -17,24 +11,25 @@ RSpec.describe Lumberjack::Rails::Middleware do
     Rails.logger = logger
   end
 
-  it "adds attributes to loggers for the request" do
-    middleware = Lumberjack::Rails::Middleware.new(app, ->(request) { {method: request.method} })
-    response = middleware.call(env)
+  it "adds context to Rails.logger" do
+    app = lambda do |env|
+      [200, {"in-context" => Rails.logger.in_context?}, ["OK"]]
+    end
 
-    expect(response).to eq([200, {"method" => "GET"}, ["OK"]])
-  end
-
-  it "does not add attributes if the logger_context_block does not return a hash" do
-    middleware = Lumberjack::Rails::Middleware.new(app, ->(request) { "invalid" })
-    response = middleware.call(env)
-
-    expect(response).to eq([200, {}, ["OK"]])
-  end
-
-  it "works without adding any attributes" do
     middleware = Lumberjack::Rails::Middleware.new(app)
     response = middleware.call(env)
 
-    expect(response).to eq([200, {}, ["OK"]])
+    expect(response).to eq([200, {"in-context" => true}, ["OK"]])
+  end
+
+  it "adds a global Lumberjack context" do
+    app = lambda do |env|
+      [200, {"in-context" => Lumberjack.in_context?}, ["OK"]]
+    end
+
+    middleware = Lumberjack::Rails::Middleware.new(app)
+    response = middleware.call(env)
+
+    expect(response).to eq([200, {"in-context" => true}, ["OK"]])
   end
 end
