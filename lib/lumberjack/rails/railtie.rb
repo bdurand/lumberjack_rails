@@ -165,7 +165,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
   initializer "lumberjack.insert_middleware" do |app|
     next unless app.config.lumberjack&.enabled
 
-    app.middleware.unshift(Lumberjack::Rails::Middleware)
+    app.middleware.unshift(Lumberjack::Rails::ContextMiddleware)
 
     if app.config.lumberjack.request_attributes_proc
       app.middleware.use(Lumberjack::Rails::RequestAttributesMiddleware, app.config.lumberjack.request_attributes_proc)
