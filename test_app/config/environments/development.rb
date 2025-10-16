@@ -64,7 +64,7 @@ Rails.application.configure do
 
   config.lumberjack.formatter = Lumberjack.build_formatter do |formatter|
     formatter.include(duration_formatter)
-    formatter.add_attribute(:tags, :tags)
+    formatter.format_attribute_name(:tags, :tags)
   end
 
   config.lumberjack.attributes = {
