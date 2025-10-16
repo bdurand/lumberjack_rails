@@ -68,16 +68,13 @@ config.lumberjack.request_attributes_proc = ->(request) {
   {
     host: request.host,
     method: request.request_method,
-    path: request.path
+    path: request.path,
     request_id: request.request_id
   }
 }
+```
 
 #### Additional Options
-
-All other options in the `config.lumberjack` namespace are passed as options to the Lumberjack logger constructor, allowing you to configure any other Lumberjack-specific settings.
-
-So, if you want to set a specific log format, you could set `config.lumberjack.template` to a [custom template](https://github.com/bdurand/lumberjack/blob/main/lib/lumberjack/template.rb) string. You can build your logger formatter with `config.lumberjack.formatter`.
 
 > [!TIP]
 > For more readable logs in development or test environments, you can set `config.lumberjack.template` to `:local` to use the built-in template intended for human readability.
@@ -122,7 +119,7 @@ config.lumberjack.formatter = Lumberjack.build_formatter do |formatter|
 end
 
 # Use a custom template that adds the request id on all log entry lines.
-config.lumberjack.template = "{{time}} {{severity}} {{progname}} {{request_id}}] {{tags}} {{message}} -- {{attributes}}"
+config.lumberjack.template = "[{{time}} {{severity}} {{progname}} {{request_id}}] {{tags}} {{message}} -- {{attributes}}"
 config.lumberjack.additional_lines = "> :request_id :message"
 
 # Format log attributes as "[name=value]" (default is [name:value])
@@ -154,11 +151,11 @@ config.lumberjack.severity_format = :emoji
 
 Rails has its own solution for logging metadata in the `tagged` method added to logger which can add an array of tags to log entries.
 
-Lumberjack supports the `tagged` method and will put the tags into the `tags` attribute. You can format these similar to how Rails formats them in the logger template with the `:tags` formatter.
+Lumberjack supports the `tagged` method and will put the tags into the `tags` attribute. You can format these similar to how Rails formats them in the logger template with the `{{tags}}` formatter.
 
 ```ruby
 # The :tags placeholder will be replaced with the tags attribute. This is the default template.
-config.lumberjack.template = "[:time :severity :progname (:pid)] :tags :message -- :attributes"
+config.lumberjack.template = "[{{time}} {{severity}} {{progname}} ({{pid}})] {{tags}} {{message}} -- {{attributes}}"
 
 # Add the :tags formatter. If you don't do this, then the tags will be formatted as an inspected array.
 config.lumberjack.formatter = Lumberjack.build_formatter do |formatter|
@@ -234,7 +231,7 @@ Lumberjack::Rails.silence_rack_request_started = true
 
 You can also silence the Rack logger in your application's configuration.
 
-```rubyruby
+```ruby
 config.lumberjack.silence_rack_request_started = true
 ```
 
