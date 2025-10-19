@@ -62,7 +62,7 @@ module Lumberjack
       def active_record_entry_formatter
         Lumberjack::EntryFormatter.build do |formatter|
           formatter.format_message("ActiveRecord::Base") { |record| "#{record.class.name}.#{record.id || "new_record"}" }
-          formatter.format_attribute("ActiveRecord::Base", :id)
+          formatter.format_attributes("ActiveRecord::Base", :id)
         end
       end
 
