@@ -2,7 +2,6 @@ source "https://rubygems.org"
 
 gemspec
 
-gem "lumberjack", github: "bdurand/lumberjack", branch: "lumberjack_2"
 gem "rails", require: false
 
 gem "dotenv"
