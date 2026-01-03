@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.0.2"
+gem "rails", "~> 8.1.0"
 
 gem "sqlite3"
 
@@ -18,5 +18,4 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "bootsnap", require: false
 
 gem "lumberjack_rails", path: "../"
-gem "lumberjack", github: "bdurand/lumberjack", branch: "lumberjack_2"
-gem "lumberjack_json_device", github: "bdurand/lumberjack_json_device", branch: "lumberjack-2"
+gem "lumberjack_json_device"

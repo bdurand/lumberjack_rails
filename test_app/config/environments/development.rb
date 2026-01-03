@@ -59,7 +59,7 @@ Rails.application.configure do
   # config.generators.apply_rubocop_autocorrect_after_generate!
 
   duration_formatter = Lumberjack::EntryFormatter.build do |formatter|
-    formatter.add_attribute(:duration) { |seconds| (seconds.to_f * 1000).round(3) }
+    formatter.format_attribute_name(:duration) { |seconds| (seconds.to_f * 1000).round(3) }
   end
 
   config.lumberjack.formatter = Lumberjack.build_formatter do |formatter|
