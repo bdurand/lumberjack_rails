@@ -35,6 +35,23 @@ RSpec.describe Lumberjack::Rails::ActionControllerLogSubscriberExtension do
       ActionController::LogSubscriber.add_process_log_attribute(:timestamp, ->(evt) { evt.time.to_i })
       expect(ActionController::LogSubscriber.eval_process_log_attributes(event)).to eq({"timestamp" => event.time.to_i})
     end
+
+    it "adds a static log attribute with a false value" do
+      ActionController::LogSubscriber.add_process_log_attribute(:cached, false)
+      expect(ActionController::LogSubscriber.eval_process_log_attributes(event)).to eq({"cached" => false})
+    end
+
+    it "raises an error if neither a value nor a block is provided" do
+      expect {
+        ActionController::LogSubscriber.add_process_log_attribute(:cached)
+      }.to raise_error(ArgumentError)
+    end
+
+    it "raises an error if both a value and a block are provided" do
+      expect {
+        ActionController::LogSubscriber.add_process_log_attribute(:cached, false) { |evt| evt.name }
+      }.to raise_error(ArgumentError)
+    end
   end
 
   describe ".process_log_attributes" do

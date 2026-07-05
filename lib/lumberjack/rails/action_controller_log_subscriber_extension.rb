@@ -37,9 +37,9 @@ module Lumberjack::Rails
       # @return [void]
       def add_process_log_attribute(name, value = nil, &block)
         raise ArgumentError.new("Must provide a value or a block") if value.nil? && block.nil?
-        raise ArgumentError.new("Cannot provide both a value and a block") if value && block
+        raise ArgumentError.new("Cannot provide both a value and a block") if !value.nil? && block
 
-        @lumberjack_process_log_attributes[name.to_s] = value || block
+        @lumberjack_process_log_attributes[name.to_s] = block || value
       end
 
       # Add log attributes to be included in the process_action log entry. The block must

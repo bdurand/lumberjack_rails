@@ -32,4 +32,27 @@ RSpec.describe Lumberjack::Rails::LogAtLevel do
     expect(logger.local_level).to be_nil
     expect(logger.level).to eq(Logger::INFO)
   end
+
+  it "should not change the local level of other loggers" do
+    other_logger = Lumberjack::Logger.new(StringIO.new, level: :info, template: "{{message}}")
+
+    logger.log_at(Logger::ERROR) do
+      expect(logger.level).to eq(Logger::ERROR)
+      expect(other_logger.local_level).to be_nil
+      expect(other_logger.level).to eq(Logger::INFO)
+    end
+  end
+
+  it "should apply the local level to forked loggers" do
+    forked_logger = logger.fork
+
+    logger.log_at(Logger::ERROR) do
+      expect(forked_logger.level).to eq(Logger::ERROR)
+      forked_logger.info("one")
+      forked_logger.error("two")
+    end
+    forked_logger.info("three")
+
+    expect(out.string.split).to eq(["two", "three"])
+  end
 end

@@ -100,7 +100,7 @@ module Lumberjack
       # @yield optional block that returns the message
       # @return [void]
       def add(severity, message_or_progname_or_attributes = nil, progname_or_attributes = nil, &block)
-        severity = Logger::Severity.coerce(severity)
+        severity = Lumberjack::Severity.coerce(severity)
         dispatch_to_each(block) do |logger, one_time_block|
           call_add_with_attributes_arg(logger, severity, message_or_progname_or_attributes, progname_or_attributes, &one_time_block)
         end
@@ -115,6 +115,25 @@ module Lumberjack
       # @return [Object] the result of the block execution
       def with_level(level, &block)
         log_at(level, &block)
+      end
+
+      # Get the local log level from the broadcasted loggers. ActiveSupport 8.1 added
+      # this method to BroadcastLogger; it is defined here so that silence and log_at
+      # work consistently on older versions of ActiveSupport as well.
+      #
+      # @return [Integer, nil] the local log level
+      def local_level
+        broadcasts.filter_map { |logger| logger.local_level if logger.respond_to?(:local_level) }.first
+      end
+
+      # Set the local log level on all broadcasted loggers that support it.
+      #
+      # @param level [Integer, Symbol, nil] the local log level
+      # @return [void]
+      def local_level=(level)
+        broadcasts.each do |logger|
+          logger.local_level = level if logger.respond_to?(:local_level=)
+        end
       end
 
       # Tag log entries with the specified attributes.

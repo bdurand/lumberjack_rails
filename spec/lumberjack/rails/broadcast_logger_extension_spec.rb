@@ -10,6 +10,16 @@ RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
     let(:standard_logger) { ::Logger.new(standard_logger_out) }
     let(:broadcast_logger) { ActiveSupport::BroadcastLogger.new(logger, standard_logger) }
 
+    it "coerces severities that are only supported by Lumberjack in the add method" do
+      trace_out = StringIO.new
+      trace_logger = Lumberjack::Logger.new(trace_out, level: :trace, template: "{{severity}} {{message}}")
+      trace_broadcast = ActiveSupport::BroadcastLogger.new(trace_logger)
+
+      trace_broadcast.add(:trace, "Trace message")
+
+      expect(trace_out.string).to include("Trace message")
+    end
+
     it "sends forked logger output back to the broadcast logger" do
       forked_logger = broadcast_logger.fork(attributes: {foo: "bar"})
       forked_logger.info("test")
