@@ -16,9 +16,9 @@
 # backward compatibility with existing Rails logging patterns.
 
 # Remove deprecated methods on Lumberjack::Logger that are implemented by ActiveSupport
-Lumberjack::Logger.remove_method(:tagged) if Lumberjack::Logger.instance_methods.include?(:tagged)
-Lumberjack::Logger.remove_method(:log_at) if Lumberjack::Logger.instance_methods.include?(:log_at)
-Lumberjack::Logger.remove_method(:silence) if Lumberjack::Logger.instance_methods.include?(:silence)
+Lumberjack::Logger.remove_method(:tagged) if Lumberjack::Logger.method_defined?(:tagged)
+Lumberjack::Logger.remove_method(:log_at) if Lumberjack::Logger.method_defined?(:log_at)
+Lumberjack::Logger.remove_method(:silence) if Lumberjack::Logger.method_defined?(:silence)
 
 # Add tagged logging support to the Lumberjack::EntryFormatter
 Lumberjack::EntryFormatter.prepend(Lumberjack::Rails::TaggedLoggingFormatter)
