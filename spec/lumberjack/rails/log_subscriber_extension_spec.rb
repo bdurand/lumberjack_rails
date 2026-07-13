@@ -64,7 +64,6 @@ RSpec.describe Lumberjack::Rails::LogSubscriberExtension do
     end
 
     it "can change the logger from a Lumberjack logger to a standard logger" do
-      original_logger = log_subscriber.logger
       new_logger = Logger.new(StringIO.new)
       log_subscriber.logger = new_logger
       expect(log_subscriber.logger).to eq(new_logger)

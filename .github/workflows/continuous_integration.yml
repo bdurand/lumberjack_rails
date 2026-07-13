@@ -10,12 +10,6 @@ on:
       - actions-*
   workflow_dispatch:
 
-env:
-  BUNDLE_CLEAN: "true"
-  BUNDLE_PATH: vendor/bundle
-  BUNDLE_JOBS: 3
-  BUNDLE_RETRY: 3
-
 jobs:
   build:
     name: build ruby-${{ matrix.ruby }} ${{ matrix.appraisal }}
@@ -38,33 +32,14 @@ jobs:
           - ruby: "ruby"
             appraisal: no_rails
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Ruby ${{ matrix.ruby }}
-        uses: ruby/setup-ruby@v1
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Ruby CI
+        uses: bdurand/github-actions/ruby-ci@v1.0.3
         with:
-          ruby-version: "${{ matrix.ruby }}"
-      - name: Install packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install libsqlite3-dev
-      - name: Setup bundler
-        if: matrix.bundler != ''
-        run: |
-          gem uninstall bundler --all
-          gem install bundler --no-document --version ${{ matrix.bundler }}
-      - name: Set Appraisal bundle
-        if: matrix.appraisal != ''
-        run: |
-          echo "using gemfile gemfiles/${{ matrix.appraisal }}.gemfile"
-          bundle config set gemfile "gemfiles/${{ matrix.appraisal }}.gemfile"
-      - name: Install gems
-        run: |
-          bundle update
-      - name: Run Tests
-        run: bundle exec rake
-      - name: standardrb
-        if:   matrix.standardrb == true
-        run:  bundle exec standardrb
-      - name: yard
-        if: matrix.yard == true
-        run:  bundle exec yard --fail-on-warning
+          ruby: ${{ matrix.ruby }}
+          appraisal: ${{ matrix.appraisal }}
+          bundler: ${{ matrix.bundler }}
+          standardrb: ${{ matrix.standardrb }}
+          yard: ${{ matrix.yard }}
+          frozen_strings: ${{ matrix.frozen_strings }}
