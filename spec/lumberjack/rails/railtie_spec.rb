@@ -100,6 +100,29 @@ RSpec.describe "Railtie" do
         expect(logger.attributes).to eq("baz" => "qux", "tags" => ["foo", "bar"])
       end
 
+      it "does not modify the config.lumberjack.attributes hash" do
+        attributes = {baz: "qux"}
+        config.lumberjack.attributes = attributes
+        config.log_tags = ["foo"]
+        logger
+        expect(attributes).to eq(baz: "qux")
+      end
+
+      it "does not add dynamic config.log_tags values as static attributes" do
+        config.log_tags = ["foo", :request_id, ->(request) { request.uuid }]
+        expect(logger.attributes).to eq("tags" => ["foo"])
+      end
+
+      it "does not add a tags attribute if all config.log_tags values are dynamic" do
+        config.log_tags = [:request_id]
+        expect(logger.attributes).to eq({})
+      end
+
+      it "does not pass the request_attributes_proc option to the logger" do
+        config.lumberjack.request_attributes_proc = ->(request) { {} }
+        expect(logger.device.options).to_not include(:request_attributes_proc)
+      end
+
       it "passes the default shift_age and shift_size to the logger" do
         expect(logger.device.options[:shift_age]).to eq 0
         expect(logger.device.options[:shift_size]).to eq 1048576

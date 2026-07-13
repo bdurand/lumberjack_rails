@@ -77,10 +77,15 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
       level = config.lumberjack.level || config.log_level || :debug
 
       # Set default attributes
-      attributes = config.lumberjack.attributes
+      attributes = config.lumberjack.attributes&.dup
       if config.log_tags
-        attributes ||= {}
-        attributes["tags"] = config.log_tags
+        # Symbol and Proc tags are evaluated per request by Rails::Rack::Logger, so only
+        # static tag values can be applied as default attributes on the logger itself.
+        static_tags = config.log_tags.reject { |tag| tag.is_a?(Symbol) || tag.respond_to?(:call) }
+        unless static_tags.empty?
+          attributes ||= {}
+          attributes["tags"] = static_tags
+        end
       end
 
       shift_age = config.lumberjack.shift_age || 0
@@ -97,7 +102,7 @@ class Lumberjack::Rails::Railtie < ::Rails::Railtie
         :shift_size,
         :log_rake_tasks,
         :middleware,
-        :request_attribute,
+        :request_attributes_proc,
         :silence_rack_request_started
       )
 
