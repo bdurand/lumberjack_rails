@@ -3,7 +3,4 @@ ruby_version: 3.0
 format: progress
 
 ignore:
-  - 'spec/**/*':
-    - Lint/UselessAssignment
-    - Lint/Void
   - 'test_app/**/*'

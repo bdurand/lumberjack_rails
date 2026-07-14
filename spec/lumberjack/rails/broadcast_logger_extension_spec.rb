@@ -305,7 +305,7 @@ RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
           if params.any? { |param| param[0] == :block }
             lumberjack_block_methods << method_name
           end
-        rescue => e
+        rescue
           # Skip methods that can't be introspected
         end
       end
