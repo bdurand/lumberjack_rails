@@ -10,7 +10,7 @@ require "rspec"
 begin
   require "simplecov"
   SimpleCov.start do
-    skip ["/spec/"]
+    add_filter ["/spec/"]
   end
 rescue LoadError
 end
