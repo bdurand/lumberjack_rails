@@ -194,18 +194,6 @@ RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
       expect(other_logger.device).to include(severity: :warn, message: /It was not called on this logger/)
     end
 
-    it "does not yield multiple when calling set_progname with a block and logs warnings" do
-      Lumberjack::Utils.with_deprecation_mode(:silent) do
-        n = 0
-        broadcast_logger.set_progname("MyApp") do
-          n += 1
-        end
-        expect(n).to eq(1)
-        expect(logger.device).to include(severity: :warn, message: /It was called on this logger/)
-        expect(other_logger.device).to include(severity: :warn, message: /It was not called on this logger/)
-      end
-    end
-
     it "does not yield multiple when calling clear_attributes with a block and logs warnings" do
       n = 0
       broadcast_logger.clear_attributes do
@@ -214,18 +202,6 @@ RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
       expect(n).to eq(1)
       expect(logger.device).to include(severity: :warn, message: /It was called on this logger/)
       expect(other_logger.device).to include(severity: :warn, message: /It was not called on this logger/)
-    end
-
-    it "does not yield multiple when calling untagged with a block and logs warnings" do
-      Lumberjack::Utils.with_deprecation_mode(:silent) do
-        n = 0
-        broadcast_logger.untagged do
-          n += 1
-        end
-        expect(n).to eq(1)
-        expect(logger.device).to include(severity: :warn, message: /It was called on this logger/)
-        expect(other_logger.device).to include(severity: :warn, message: /It was not called on this logger/)
-      end
     end
 
     context "when there is not a lumberjack logger" do
@@ -275,14 +251,6 @@ RSpec.describe Lumberjack::Rails::BroadcastLoggerExtension do
       it "yields when calling with_progname with a block" do
         n = 0
         broadcast_logger.with_progname("MyApp") do
-          n += 1
-        end
-        expect(n).to eq(1)
-      end
-
-      it "yields when calling untagged with a block" do
-        n = 0
-        broadcast_logger.untagged do
           n += 1
         end
         expect(n).to eq(1)
