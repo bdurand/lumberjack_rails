@@ -179,29 +179,12 @@ module Lumberjack
         dispatch_block_method(:clear_attributes, &block)
       end
 
-      # Execute a block without any tags.
-      #
-      # @yield the block to execute without tags
-      # @return [Object] the result of the block execution
-      def untagged(&block)
-        dispatch_block_method(:untagged, &block)
-      end
-
       # Set the progname temporarily for a block.
       #
       # @param value [String] the progname to set
       # @yield the block to execute with the specified progname
       # @return [Object] the result of the block execution
       def with_progname(value, &block)
-        dispatch_block_method(:with_progname, value, &block)
-      end
-
-      # Alias for with_progname for backward compatibility.
-      #
-      # @param value [String] the progname to set
-      # @yield the block to execute with the specified progname
-      # @return [Object] the result of the block execution
-      def set_progname(value, &block)
         dispatch_block_method(:with_progname, value, &block)
       end
 

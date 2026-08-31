@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.0.2
 
+### Changed
+
+- Bumped the minimum lumberjack version dependency to 2.1.
+
+### Removed
+
+- Removed `untagged` and `set_progname` from `ActiveSupport::BroadcastLogger`. Both methods were removed from `Lumberjack::Logger` in lumberjack 2.1, so the broadcast versions no longer had anything to dispatch to. Use `clear_attributes` instead of `untagged` and `with_progname` instead of `set_progname`.
+
 ### Fixed
 
 - Fixed local log levels set with `silence` and `log_at` bleeding between unrelated loggers. ActiveSupport 8.1 sets the key used to store the local log level in the logger constructor, which Lumberjack loggers do not call, so all loggers were sharing a single local level per thread.
